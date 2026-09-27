@@ -6,49 +6,7 @@
 
 ## [2026-09-24 ~ 2026-09-25] aiccloud VPS Deployment & Troubleshooting
 
-* **Tasks 9-20 Archive**: Doctor footer placement, QR, referrals, aiccloud deployment CLI, prescription fixes, opd routing, `throgendb` isolation, workspace Git workflow, website phase 1 foundation, and Supabase schema layer.
-
----
-
-### Task 21: ThyroGen Website - Phase 3 Doctor Chamber, Profiles & Appointment Booking
-* **Date & Time**: 2026-09-27 06:02 IST
-* **Goal**: Implement Doctor Directory, doctor profile routing, chamber schedules, and appointment booking form.
-* **Steps Taken**:
-  1. Created `src/components/doctor-components.tsx` (`DoctorDirectory` & `DoctorDetail`) with zero-hallucination notices and helpline CTAs (`9134101587` & `8001101641`).
-  2. Created `src/components/appointment-form.tsx`: responsive form with patient demographics, doctor selector, date/time pickers, symptoms, and confirmation screen.
-  3. Updated TanStack Router routes (`doctors.index.tsx`, `doctors.$id.tsx`, `appointment.tsx`).
-  4. Verified local build (`npm run build` passed) and committed (`ca33f44`) to `origin/main`.
-
----
-
-### Task 22: ThyroGen Website - Phase 4 Live Referral API Bridge & Edge Function
-* **Date & Time**: 2026-09-27 06:05 IST
-* **Goal**: Bridge patient appointment booking directly with ThyroGen OPD backend (`POST https://thyrogendiagnostic.in/api/v1/referral/book`).
-* **Steps Taken**:
-  1. Created Supabase Edge Function `supabase/functions/book-referral/index.ts` to bridge requests to backend referral desk on port 5001.
-  2. Updated `src/lib/services.ts` `bookAppointment` to sync with `/referral/book` (8s timeout), extracting official OPD referral tokens (`REF-XXXXX`).
-  3. Updated `src/components/appointment-form.tsx` to display live tracking token on booking confirmation.
-  4. Verified build (`npm run build` passed) and committed (`82b07f5`) to `origin/main`.
-
----
-
-### Task 23: ThyroGen Website - Phase 5 Pathology, Radiology & Health Packages Catalogues
-* **Date & Time**: 2026-09-27 06:10 IST
-* **Goal**: Implement complete interactive catalogues and dynamic detail pages for Pathology Tests, Radiology & Imaging Services, and Preventive Health Packages with zero-hallucination compliance.
-* **Steps Taken**:
-  1. Verified remote sync with `git pull origin main` (already up to date).
-  2. Extended `src/lib/services.ts` with single-item lookups (`fetchLabTestById`, `fetchRadiologyServiceById`, `fetchPackageById`).
-  3. Created `src/components/catalogue-components.tsx`:
-     - `TestsCatalogue`: Live search bar, category pill filters (Hematology, Biochemistry, Endocrinology, Immunology, Clinical Pathology, Microbiology), test cards with specimen, fasting requirement, and turnaround time. Zero-hallucination fallback notice when unconfigured.
-     - `TestDetail`: Full test breakdown with specimen requirements, fasting guidelines, and direct booking actions.
-     - `RadiologyCatalogue` & `RadiologyDetail`: Imaging modalities with patient preparation instructions and fee breakdown.
-     - `PackagesCatalogue` & `PackageDetail`: Comprehensive wellness checkup profiles with parameter count, test list, and discount calculations.
-  4. Updated routes:
-     - `src/routes/tests.index.tsx` & `src/routes/tests.$id.tsx`
-     - `src/routes/radiology.index.tsx` & `src/routes/radiology.$id.tsx`
-     - `src/routes/packages.index.tsx` & `src/routes/packages.$id.tsx`
-  5. Tested dev server routes (`/tests`, `/radiology`, `/packages` all returning HTTP 200 OK) and verified production bundle with `npm run build` (0 errors).
-  6. Committed (`9706c7b`) and pushed to GitHub `origin/main`.
+* **Tasks 9-23 Archive**: Doctor footer placement, QR, referrals, aiccloud deployment CLI, prescription fixes, opd routing, `throgendb` isolation, workspace Git workflow, website foundation, Supabase schema layer, doctor chamber booking, live referral API bridge, pathology/radiology/packages catalogues.
 
 ---
 
@@ -287,3 +245,32 @@
   4. **Build, Deployment & Verification**:
      - Built production bundle (`npm run build` completed in 2.57s) and deployed to VPS (`148.113.6.25:20172`).
      - Live verification: `POST /api/admin-auth/send-otp` (200 OK), `/api/v1/user/doctors` (200 OK), and home page (200 OK).
+
+---
+
+### Task 36: Hero Section Upload Fix, Missing Play Icon Crash & Reports 404 Resolution
+* **Date & Time**: 2026-09-27 20:50 IST
+* **Goal**: Fix hero section upload option being broken, eliminate runtime crash `ReferenceError: Play is not defined`, resolve Supabase `reports` table 404 error, and support full multi-device persistence with server-side endpoints.
+* **Steps Taken**:
+  1. **Fixed Missing Lucide-React Icon Crash**:
+     - Imported `Play`, `Pause`, `Upload`, and `CheckSquare` into `src/components/admin-components.tsx` that previously caused React to throw uncaught `ReferenceError: Play is not defined` when rendering video highlights.
+  2. **Fixed Supabase Reports Table 404**:
+     - Corrected queries in `src/lib/services.ts` (`fetchAdminDashboardStats`, `fetchAdminReports`, `createPatientReport`) from non-existent table `patient_reports` to real table `reports`.
+  3. **Resolved Hero Visual Precedence & Upload Hierarchy**:
+     - Added `heroVisualMode: 'auto' | 'image' | 'video' | '3d'` to `SiteSettings`.
+     - In `HeroVisualShowcase` (`src/components/site-pages.tsx`), enabled proper display for uploaded hero banners, with interactive top feature bar allowing visitors to switch between Banner, Video Reels, and 3D Core.
+     - Fixed `getSiteSettings()` in `src/lib/site-settings.ts` to allow empty video lists `[]` without forcibly resetting to `DEFAULT_HERO_VIDEOS`.
+  4. **Admin Hero Image Upload Redesign**:
+     - Added Primary Hero Visual Display selector in Admin Branding tab (`Smart Auto`, `Custom Banner`, `Video Reels`, `3D Diagnostic Core`).
+     - Added live image thumbnail preview, "Set as Active Visual" button, "Remove Banner" action, and automatic mode activation upon image upload.
+     - Reset `input.value = ''` after upload to enable re-uploading identical or updated files.
+  5. **Server-Assisted Upload & Settings Persistence**:
+     - Implemented `/site-api/upload` and `/api/upload` in `src/server.ts` utilizing `@aws-sdk/client-s3` for fail-safe server-proxied uploads.
+     - Implemented `/site-api/site-settings` and `/api/site-settings` to persist global branding and banner changes to disk and synchronize across all client devices.
+     - Reconfigured VPS Nginx with dedicated proxy blocks for `/site-api`, `/api/upload`, and `/api/site-settings` to port 3002.
+  6. **Build, Deployment & Verification**:
+     - Built production bundle (`npm run build` completed in 7.55s with 0 errors).
+     - Deployed live to VPS via `deploy-thyrogen-now.js` (PM2 `thyrogen-website` restarted and verified online).
+     - Verified `GET /site-api/site-settings` (HTTP 200 OK) and homepage `https://thyrogendiagnostic.in` (HTTP 200 OK).
+     - Committed (`71a6374`) and pushed `thyrogen` to `origin/main`.
+
