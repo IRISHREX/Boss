@@ -82,8 +82,24 @@ npm run build
 node deploy-hostinger.js
 ```
 
----
+## Git Branches & Synchronization Rules
+* **Git Branches**:
+  * Backend (`BMS-opd-be`): `origin/main`
+  * Frontend (`BMS-opd-fe`): `origin/Sohel2`
 
-## Git Branches
-* Backend (`BMS-opd-be`): `origin/main`
-* Frontend (`BMS-opd-fe`): `origin/Sohel2`
+### Mandatory Git Workflow Rules:
+1. **Always Pull Before Starting Work**:
+   * Before starting any new task, inspect and pull latest changes from remote:
+     * `cd BMS-opd-be && git pull origin main`
+     * `cd BMS-opd-fe && git pull origin Sohel2`
+   * **Smart Skip Condition**: If the last local pull is more recent than the last push (or if a pull was already verified in the current active session without subsequent remote activity), assume pull is taken and proceed.
+2. **Always Push After Completing Task**:
+   * Once a task is completed, verified, or deployed:
+     * Stage all modified files and commit with a clear, descriptive message.
+     * Push immediately to the respective remote branch (`BMS-opd-be` -> `origin/main`, `BMS-opd-fe` -> `origin/Sohel2`, `BOSS` -> `origin/main`, `thyrogen` -> `origin/main`).
+3. **Timestamped Push Notification**:
+   * Whenever changes are pushed, document and announce them with exact **Date & Time (IST)**, commit hash, and summary of changes.
+   * Explicitly remind the user to take a pull on any other local clones or environments.
+   * Record every push and deployment in `MEMORY.md` within the task log.
+   * Read `MEMORY.md` after taking pull and  before starting any new task.
+

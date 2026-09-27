@@ -8,88 +8,6 @@
 
 
 
-### Task 3: Remote Repository Sync (Frontend & Backend Pull)
-* **Date & Time**: 2026-09-25 00:55 ~ 01:05 IST
-* **Goal**: Pull latest commits from GitHub repositories and redeploy.
-* **Steps Taken**:
-  1. `BMS-opd-be`: Pulled `origin/main` (received updates to `controller/reportController.js`).
-  2. `BMS-opd-fe`: Switched to tracking branch `origin/Sohel2`, pulled 6 new commits (ID modifications, prescription/invoice fixes, chart layouts).
-  3. Resolved missing dependency: installed `react-countup` in `BMS-opd-fe`.
-  4. Ensured `.env.production` remained `VITE_BASE_URL=https://biomechasoft.in`.
-  5. Built production bundle (`npm run build`) and redeployed both BE and FE to VPS.
-
----
-
-### Task 4: Local VPS MongoDB 8.0 Installation & Database Migration
-* **Date & Time**: 2026-09-25 01:07 ~ 01:25 IST
-* **Goal**: Migrate from MongoDB Atlas to local VPS MongoDB for sub-millisecond query speed, while preserving Atlas as automatic failover.
-* **Steps Taken**:
-  1. Installed MongoDB 8.0 Community Edition (`mongodb-org`, `mongodb-org-tools`) on Ubuntu 24.04 noble.
-  2. Optimized memory footprint in `/etc/mongod.conf`:
-     - Configured `wiredTiger.engineConfig.cacheSizeGB: 0.25` (256 MB) to prevent out-of-memory on 1GB RAM VPS.
-     - Bound to `127.0.0.1:27017`.
-  3. Migrated entire database from Atlas using `mongodump` & `mongorestore`:
-     - Restored **5,399 total documents** into `MERN_STACK_HOSPITAL_MANAGEMENT` with 0 failures.
-     - Preserved: 4,115 medicines, 917 diagnostic tests, 236 logs, 44 messages, 15 users, all appointments & prescriptions.
-  4. Updated `BMS-opd-be/database/dbConnection.js`:
-     - Primary: Connects to local `mongodb://127.0.0.1:27017/MERN_STACK_HOSPITAL_MANAGEMENT` (<1ms latency).
-     - Failover: Automatically falls back to MongoDB Atlas cluster if local service is unavailable.
-  5. Restarted PM2: verified `bms-backend` online and connected to local MongoDB.
-
----
-
-### Task 5: aiccloud S3 Object Storage Integration & Automated Daily Backup
-* **Date & Time**: 2026-09-25 01:25 ~ 01:40 IST
-* **Goal**: Connect user's aiccloud S3 bucket for file storage and automated database/CSV backups.
-* **Credentials Configured**:
-  - Endpoint: `https://s3.aiccloud.online`
-  - Bucket: `aic-585105c0`
-  - Region: `us-east-1`
-  - Access Key: `4987216CA9E680068A03`
-* **Steps Taken**:
-  1. Installed `@aws-sdk/client-s3` in `BMS-opd-be`.
-  2. Created `BMS-opd-be/utils/s3Storage.js` supporting direct uploads, CSV exports, and object listing.
-  3. Added S3 backup controller routes:
-     - `POST /api/v1/backup/s3/trigger`
-     - `GET /api/v1/backup/s3/list`
-  4. Created CLI automation script `BMS-opd-be/scripts/runS3Backup.js`.
-  5. Created `/root/backup-to-s3.sh` and scheduled cron job at `02:00 AM UTC` daily:
-     - Dumps compressed MongoDB `.gz` archive.
-     - Generates and uploads human-readable Appointments CSV, Patients CSV, and Medicines Master CSV to S3.
-     - Prunes local backups older than 7 days.
-  6. Verified initial run: confirmed `.gz` archive and CSV files uploaded to `aic-585105c0` bucket.
-
----
-
-### Task 6: GitHub Version Control Push
-* **Date & Time**: 2026-09-25 06:44 IST
-* **Goal**: Commit and push all work to GitHub.
-* **Steps Taken**:
-  1. `BMS-opd-be` (`origin/main`): Committed `f56557f` ("feat: add local mongodb failover, aiccloud s3 backup integration").
-  2. `BMS-opd-fe` (`origin/Sohel2`): Committed `6ca9d6d` ("chore: point production API to biomechasoft.in and add react-countup").
-  3. Root repo `BMS-OPD` (`origin/main`): Committed `ce08926` updating submodule pointers. All pushed cleanly.
-
----
-
-### Task 7: S3 Doctor Assets Storage & Image Serving Resolution
-* **Date & Time**: 2026-09-25 07:05 ~ 07:25 IST
-* **Goal**: Fix doctor stamp, avatar (DP), header, and footer images failing to load in frontend and PDF previews.
-* **Root Causes Identified**:
-  1. **Nginx Missing Route**: Nginx on VPS lacked a `location /uploads` directive. Requests for `/uploads/doctors/...` were caught by `location /` and returned `index.html` (text/html) instead of image bytes.
-  2. **Private S3 Bucket**: The aiccloud S3 bucket is private; direct browser requests to `https://s3.aiccloud.online/aic-585105c0/...` return `403 Forbidden AccessDenied`.
-  3. **No S3 Sync for Uploads**: Multer was saving uploaded images strictly to local disk `/uploads/doctors/` without uploading to S3.
-  4. **Missing footerImage Field**: `footerImage` was absent from `userSchema.js`, `upload.js`, and `userController.js`.
-* **Steps Taken**:
-  1. Updated `BMS-opd-be/models/userSchema.js` and `middlewares/upload.js` to add `footerImage`.
-  2. Updated `userController.js` (`addNewDoctor`, `updateUserById`, `updateDoctorProfile`) to asynchronously upload doctor images (`docAvatar`, `stampImage`, `signImage`, `headerImage`, `footerImage`) directly to S3 bucket `aic-585105c0` under `doctors/`.
-  3. Implemented smart S3 fallback endpoint in `app.js` (`GET /uploads/doctors/:filename`): serves from local disk cache, and if missing, streams from S3 bucket and caches locally.
-  4. Updated Nginx config on VPS to proxy `/uploads` to backend (`127.0.0.1:5000`) and restarted Nginx.
-  5. Synced all 20 existing doctor uploads from VPS disk to S3 bucket `aic-585105c0/doctors/`.
-  6. Verified over HTTPS: `https://biomechasoft.in/uploads/doctors/...` now returns `HTTP 200 OK` with `Content-Type: image/jpeg`.
-  7. Committed & pushed backend changes (`e829598`) and root submodule pointer (`d4e4f78`).
-
----
-
 ### Task 8: Prescription PDF Storage (S3, 3-Version Rolling Retention) & Multi-View Downloads
 * **Date & Time**: 2026-09-25 09:30 ~ 10:15 IST
 * **Goal**: Enable direct PDF generation and saving to S3 disk storage, retaining up to 3 prescriptions per patient (same-day overwrites, >3 oldest purged). Add date-selection download modal across Dashboard, Reports, and Messages.
@@ -259,4 +177,105 @@
      - `https://thyrogendiagnostic.in/api/v1/user/doctors`: HTTP 200 OK (Express on port 5001 + throgendb).
      - `https://opd.biomechasoft.in`: HTTP 200 OK (React frontend).
      - `https://opd.biomechasoft.in/api/v1/user/doctors`: HTTP 200 OK (Express on port 5000 + MERN_STACK_HOSPITAL_MANAGEMENT).
+
+---
+
+### Task 18: Agent Git Workflow Rules Setup & Full Repository Sync
+* **Date & Time**: 2026-09-26 22:45 IST
+* **Goal**: Establish mandatory agent workflow rules (always pull before starting, push after task completion, report timestamped push and notify user to pull, optimize pull if last pull is more recent than push) and synchronize both frontend and backend repositories with GitHub.
+* **Steps Taken**:
+  1. Updated `Boss/AGENTS.md` with explicit Git synchronization and workflow rules.
+  2. Created workspace agent rule `.agents/rules/git-workflow.md` for IDE-wide enforcement across turns.
+  3. Pulled latest changes in `BMS-opd-be` (`origin/main`, updated `controller/appointmentController.js` at commit `dbe7ae4`).
+  4. Pulled, rebased, and pushed `BMS-opd-fe` changes (`origin/Sohel2`, commit `4e9574e`).
+  5. Both repositories verified clean and 100% up to date with remote.
+
+---
+
+### Task 19: ThyroGen Diagnostic & Health Care Unit Website - Phase 1 Foundation
+* **Date & Time**: 2026-09-27 05:40 IST
+* **Goal**: Implement Phase 1 of `https://github.com/IRISHREX/thyrogen.git` strictly adhering to zero-hallucination policy and verified business data.
+* **Steps Taken**:
+  1. Cloned `thyrogen` repository and installed dependencies cleanly with Vite 8 + TanStack Start.
+  2. Implemented `SiteHeader` with brand logo, desktop/mobile navigation, phone call actions (`9134101587`, `8001101641`), secondary CTA "Book Test", primary CTA "Book Appointment".
+  3. Implemented `SiteFooter` with Bengali address, verified helpline numbers, service/legal links, and Mehebub Dhuliyan association tag.
+  4. Implemented Home page sections: Hero, Services, Popular Tests (empty state pending DB), Health Packages (empty state pending DB), Doctor Chamber ("No doctors have been added yet"), How It Works (4 steps), and Contact.
+  5. Implemented zero-hallucination directory & detail routes across Pathology, Radiology, Packages, Doctors, Appointments, Reports, Home Collection, and Contact.
+  6. Verified local production build (`npm run build` completed with 0 errors).
+  7. Committed (`7b2d814`) and pushed to `main` branch on GitHub.
+
+---
+
+### Task 20: ThyroGen Website - Phase 2 Supabase PostgreSQL Schema, RLS & Data Layer
+* **Date & Time**: 2026-09-27 05:58 IST
+* **Goal**: Implement Phase 2 database, authentication, and security foundation for ThyroGen.
+* **Steps Taken**:
+  1. Verified remote sync with `git pull origin main` (already up to date).
+  2. Installed `@supabase/supabase-js` without security vulnerabilities.
+  3. Created `supabase/migrations/20260927000000_init_thyrogen_schema.sql` and `supabase/schema.sql` with full relational PostgreSQL tables (`profiles`, `doctors`, `doctor_schedules`, `test_categories`, `lab_tests`, `radiology_services`, `packages`, `appointments`, `reports`, `home_collection_bookings`, `site_settings`).
+  4. Configured Row Level Security (RLS) policies for patient privacy, public viewing of active tests/doctors, and admin-only management.
+  5. Implemented safe Supabase client `src/lib/supabase.ts` with SSR and mock-safe fallback.
+  6. Implemented typed data access services `src/lib/services.ts` and Auth context/hook `src/lib/auth-context.tsx`.
+  7. Seeded verified diagnostic centre information and standard pathology categories.
+  8. Verified production build (`npm run build` completed with 0 errors).
+  9. Committed (`599a641`) and pushed to GitHub `origin/main`.
+
+---
+
+### Task 21: ThyroGen Website - Phase 3 Doctor Chamber, Profiles & Appointment Booking
+* **Date & Time**: 2026-09-27 06:02 IST
+* **Goal**: Implement Phase 3 Doctor Directory, individual doctor profile routing, chamber schedules, and patient appointment booking form with zero-hallucination compliance.
+* **Steps Taken**:
+  1. Verified remote sync with `git pull origin main` (already up to date).
+  2. Created `src/components/doctor-components.tsx`:
+     - `DoctorDirectory`: Loads active doctors from Supabase via `fetchDoctors()`. When database is empty, displays strictly required zero-hallucination notice *"No doctors have been added yet."* with quick call CTAs (`9134101587` & `8001101641`).
+     - `DoctorDetail`: Dynamic doctor profile route loading doctor by ID and chamber schedules per day of week with direct appointment action.
+  3. Created `src/components/appointment-form.tsx`:
+     - Responsive patient appointment booking form supporting patient name, 10-digit mobile, age, gender, doctor selection (dynamically populated with query parameter pre-selection), preferred date with min=today, time slot, and clinical symptoms/notes.
+     - Confirmation screen displaying booking details and helpline follow-up instructions.
+  4. Updated routes:
+     - `src/routes/doctors.index.tsx`: Wired to `DoctorDirectory` with complete SEO tags.
+     - `src/routes/doctors.$id.tsx`: Wired to `DoctorDetail` with param extraction.
+     - `src/routes/appointment.tsx`: Wired to `AppointmentBooking` with Zod search param validation.
+  5. Verified local build (`npm run build` completed with 0 errors) and dev server routes (`/doctors` and `/appointment` HTTP 200 OK).
+  6. Committed (`ca33f44`) and pushed to GitHub `origin/main`.
+
+---
+
+### Task 22: ThyroGen Website - Phase 4 Live Referral API Bridge & Edge Function
+* **Date & Time**: 2026-09-27 06:05 IST
+* **Goal**: Bridge patient appointment booking directly with ThyroGen OPD backend (`POST https://thyrogendiagnostic.in/api/v1/referral/book`) via Supabase Edge Function isolation and resilient service fallback.
+* **Steps Taken**:
+  1. Verified remote sync with `git pull origin main` (already up to date).
+  2. Created Supabase Edge Function `supabase/functions/book-referral/index.ts` to bridge inbound web requests to backend referral desk on port 5001.
+  3. Updated `src/lib/services.ts` `bookAppointment` to sync with `https://thyrogendiagnostic.in/api/v1/referral/book` with an 8-second timeout, extracting the official OPD referral token (e.g. `REF-XXXXX`).
+  4. Updated `src/components/appointment-form.tsx` to prominently present the live token reference on the success confirmation card.
+  5. Tested live HTTP referral booking via Node: confirmed `success: true` and generation of tracking token `REF-1790469263572-10` from live backend.
+  6. Verified local production build (`npm run build` completed with 0 errors).
+  7. Committed (`82b07f5`) and pushed to GitHub `origin/main`.
+
+---
+
+### Task 23: ThyroGen Website - Phase 5 Pathology, Radiology & Health Packages Catalogues
+* **Date & Time**: 2026-09-27 06:10 IST
+* **Goal**: Implement complete interactive catalogues and dynamic detail pages for Pathology Tests, Radiology & Imaging Services, and Preventive Health Packages with zero-hallucination compliance.
+* **Steps Taken**:
+  1. Verified remote sync with `git pull origin main` (already up to date).
+  2. Extended `src/lib/services.ts` with single-item lookups (`fetchLabTestById`, `fetchRadiologyServiceById`, `fetchPackageById`).
+  3. Created `src/components/catalogue-components.tsx`:
+     - `TestsCatalogue`: Live search bar, category pill filters (Hematology, Biochemistry, Endocrinology, Immunology, Clinical Pathology, Microbiology), test cards with specimen, fasting requirement, and turnaround time. Zero-hallucination fallback notice when unconfigured.
+     - `TestDetail`: Full test breakdown with specimen requirements, fasting guidelines, and direct booking actions.
+     - `RadiologyCatalogue` & `RadiologyDetail`: Imaging modalities with patient preparation instructions and fee breakdown.
+     - `PackagesCatalogue` & `PackageDetail`: Comprehensive wellness checkup profiles with parameter count, test list, and discount calculations.
+  4. Updated routes:
+     - `src/routes/tests.index.tsx` & `src/routes/tests.$id.tsx`
+     - `src/routes/radiology.index.tsx` & `src/routes/radiology.$id.tsx`
+     - `src/routes/packages.index.tsx` & `src/routes/packages.$id.tsx`
+  5. Tested dev server routes (`/tests`, `/radiology`, `/packages` all returning HTTP 200 OK) and verified production bundle with `npm run build` (0 errors).
+  6. Committed (`9706c7b`) and pushed to GitHub `origin/main`.
+
+
+
+
+
 
