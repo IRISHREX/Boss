@@ -8,8 +8,6 @@ const endpoints = [
   'https://thyrogendiagnostic.in/api/v1/user/doctors',
   'https://opd.thyrogendiagnostic.in/',
   'https://opd.thyrogendiagnostic.in/api/v1/user/doctors',
-  'https://opd.biomechasoft.in/',
-  'https://opd.biomechasoft.in/api/v1/user/doctors',
 ];
 
 function checkUrl(url) {

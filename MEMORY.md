@@ -6,36 +6,7 @@
 
 ## [2026-09-24 ~ 2026-09-25] aiccloud VPS Deployment & Troubleshooting
 
-* **Tasks 9-15 Archive**: Doctor footer placement, General settings location QR, Receipt serial numbers & referral wizard, Prescription save fixes, aiccloud dynamic deployment CLI creation, and VPS redeployment.
-
----
-
-### Task 16: Subdomain Migration (`opd.biomechasoft.in`), SSL Configuration & Frontend Deployment
-* **Date & Time**: 2026-09-25 23:20 ~ 2026-09-26 00:50 IST
-* **Goal**: Move BMS-OPD application to subdomain `https://opd.biomechasoft.in/`, free root domain `https://biomechasoft.in/` (temporary 301 redirect until landing page is ready), ensure SSL/HTTPS active, resolve VPS high load / OOM deadlock, and deploy frontend.
-* **Steps Taken**:
-  1. **DNS & Routing**:
-     - Added `opd` A-record pointing to VPS `148.113.6.25`.
-     - Configured Nginx at `/etc/nginx/sites-available/default`:
-       - `server_name opd.biomechasoft.in`: serves `/root/BMS-opd-fe` and proxies `/api` & `/uploads` to `127.0.0.1:5000`.
-       - `server_name biomechasoft.in`: 301 redirects to `https://opd.biomechasoft.in$request_uri`.
-     - SSL/HTTPS: Automatically terminated by edge Caddy router.
-  2. **Frontend Environment**: Updated `BMS-opd-fe/.env.production` to `VITE_BASE_URL=https://opd.biomechasoft.in`. Built production bundle locally.
-  3. **VPS Memory Optimization & Recovery**:
-     - Identified previous remote `vite build` process in uninterruptible disk sleep consuming 640MB RAM (load average spiked to 150+).
-     - Terminated stuck process (`kill -9 9156 9140 9167`) and removed `/root/build-fe`.
-     - Restored server stability: load average dropped to 3.7 with 729MB available RAM.
-  4. **Frontend Transfer**:
-     - Packaged local production `dist` into `.tar.gz`.
-     - Transferred directly to VPS `/root/BMS-opd-fe` via authenticated OpenSSH `scp` in <15s and unpacked.
-     - Set permissions (`chmod -R 755 /root/BMS-opd-fe`) and reloaded Nginx.
-  5. **Verification**:
-     - `https://opd.biomechasoft.in/`: HTTP 200 OK (React app live with full JS bundle).
-     - `https://opd.biomechasoft.in/api/`: Express backend proxy responding with CORS headers.
-     - `https://biomechasoft.in/`: HTTP 301 redirecting to `https://opd.biomechasoft.in/`.
-     - PM2: `bms-backend` online (pid 7364, 0% CPU, 96.9MB RAM).
-
----
+* **Tasks 9-16 Archive**: Doctor footer placement, QR, referrals, aiccloud deployment CLI, prescription fixes, and initial `opd.biomechasoft.in` subdomain routing.
 
 ### Task 17: Multi-Domain Deployment (`thyrogendiagnostic.in`), Dedicated Backend (Port 5001) & Isolated Database (`throgendb`)
 * **Date & Time**: 2026-09-26 19:15 ~ 20:30 IST
@@ -287,4 +258,33 @@
      - `https://opd.thyrogendiagnostic.in/`: HTTP 200 OK (OPD Web Application).
      - `https://opd.biomechasoft.in/`: HTTP 200 OK (BMS OPD Web Application).
   6. Pushed commits to `thyrogen` (`78fdcf6`) and `Boss` (`origin/main`).
+
+---
+
+### Task 32: Complete BioMechaSoft Decommissioning & VPS Infrastructure Cleanup
+* **Date & Time**: 2026-09-27 17:20 IST
+* **Goal**: Completely decommission and remove all traces of BioMechaSoft (`MERN_STACK_HOSPITAL_MANAGEMENT` database, `bms-backend` PM2 process, `/root/BMS-opd-fe`, `/root/BMS-opd-be`, Nginx server blocks, S3 backup scripts) from the aiccloud VPS, while keeping all ThyroGen services, domains, and database (`throgendb`) 100% intact.
+* **Steps Taken**:
+  1. **Database Removal & Verification**:
+     - Verified `throgendb` status: 5,597+ documents intact across 22 collections (4,115 medicines, 917 tests, users, referrals, settings).
+     - Dropped MongoDB database `MERN_STACK_HOSPITAL_MANAGEMENT` cleanly via `db.dropDatabase()`. Verified response `{ ok: 1, dropped: 'MERN_STACK_HOSPITAL_MANAGEMENT' }`.
+  2. **PM2 Process Removal**:
+     - Stopped and deleted PM2 process `bms-backend` (`pm2 delete bms-backend`).
+     - Executed `pm2 save`. Only `thyrogen-backend` (port 5001) and `thyrogen-website` (port 3002) remain active.
+  3. **Filesystem Cleanup**:
+     - Removed `/root/BMS-opd-fe`, `/root/BMS-opd-be`, and `/root/dist.b64` from VPS root filesystem.
+  4. **Nginx Security & Routing Reconfiguration**:
+     - Added `default_server` catch-all block returning 404 to immediately reject unconfigured domains and decommissioned host headers (`opd.biomechasoft.in`, `biomechasoft.in`).
+     - Maintained dedicated blocks for `opd.thyrogendiagnostic.in` (port 5001 / `/root/thyrogen-opd-fe`) and `thyrogendiagnostic.in` (SSR port 3002 / static assets / API bridge).
+     - Verified configuration with `nginx -t` and reloaded Nginx.
+  5. **Automated S3 Backup Script Cleanup**:
+     - Updated `/root/backup-to-s3.sh` to strictly target `throgendb` and upload compressed archives to S3 (`s3://aic-585105c0/backups/throgendb/`).
+  6. **Live Verification**:
+     - `https://thyrogendiagnostic.in/`: HTTP 200 OK.
+     - `https://thyrogendiagnostic.in/doctors`: HTTP 200 OK.
+     - `https://thyrogendiagnostic.in/tests`: HTTP 200 OK.
+     - `https://opd.thyrogendiagnostic.in/`: HTTP 200 OK.
+     - `https://opd.thyrogendiagnostic.in/api/v1/user/doctors`: HTTP 200 OK.
+     - `https://opd.biomechasoft.in/`: Decommissioned / rejected connection.
+
 

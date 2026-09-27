@@ -11,16 +11,17 @@
 Whenever working with the aiccloud production VPS:
 
 ### 1. Target Infrastructure
-* **App 1 (BioMechaSoft OPD)**:
-  * **Domain**: `https://opd.biomechasoft.in` (Root `https://biomechasoft.in` 301 redirects to `opd.biomechasoft.in`)
-  * **Frontend Path**: `/root/BMS-opd-fe` (served via Nginx)
-  * **Backend Path**: `/root/BMS-opd-be` (managed via PM2 as `bms-backend` on port `5000`)
-  * **Database**: Local MongoDB 8.0 on VPS `mongodb://127.0.0.1:27017/MERN_STACK_HOSPITAL_MANAGEMENT`
-* **App 2 (ThyroGen Diagnostic)**:
+* **App 1 (ThyroGen Diagnostic Website - SSR & Dynamic Portals)**:
   * **Domain**: `https://thyrogendiagnostic.in` and `https://www.thyrogendiagnostic.in`
-  * **Frontend Path**: `/root/thyrogen-fe` (served via Nginx)
+  * **SSR Node Path**: `/root/thyrogen-website` (managed via PM2 as `thyrogen-website` on port `3002`)
+  * **Static Assets**: `/root/thyrogen-website/public/assets`
+* **App 2 (ThyroGen OPD Web Application)**:
+  * **Domain**: `https://opd.thyrogendiagnostic.in`
+  * **Frontend Path**: `/root/thyrogen-opd-fe` (served via Nginx)
   * **Backend Path**: `/root/thyrogen-be` (managed via PM2 as `thyrogen-backend` on port `5001`)
   * **Database**: Local MongoDB 8.0 on VPS `mongodb://127.0.0.1:27017/throgendb`
+* **Decommissioned**:
+  * BioMechaSoft (`biomechasoft.in`, `opd.biomechasoft.in`, `/root/BMS-opd-fe`, `/root/BMS-opd-be`, PM2 `bms-backend` on port 5000, and DB `MERN_STACK_HOSPITAL_MANAGEMENT`) completely decommissioned and removed.
 * **VPS Details**:
   * **VPS IP**: `148.113.6.25`
   * **SSH Port**: `20172`
@@ -33,7 +34,7 @@ Whenever working with the aiccloud production VPS:
   * **Region**: `us-east-1`
   * **Access Key**: `4987216CA9E680068A03`
   * **Secret Key**: `iFoDGF0LaDaGqkg7FoJB7z4sUf8`
-* **Automated Daily Backup**: Runs via cron at `02:00 AM UTC` (`/root/backup-to-s3.sh`) dumping compressed MongoDB archive and Appointments/Patients/Medicines CSV files directly into the S3 bucket.
+* **Automated Daily Backup**: Runs via cron at `02:00 AM UTC` (`/root/backup-to-s3.sh`) dumping compressed MongoDB archive of `throgendb` directly into the S3 bucket.
 
 ### 2. How to Deploy to aiccloud VPS
 #### Dynamic Deployment CLI (Recommended):
