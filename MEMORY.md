@@ -6,19 +6,7 @@
 
 ## [2026-09-24 ~ 2026-09-25] aiccloud VPS Deployment & Troubleshooting
 
-* **Tasks 9-17 Archive**: Doctor footer placement, QR, referrals, aiccloud deployment CLI, prescription fixes, opd subdomain routing, and dedicated `throgendb` isolation on port 5001.
-
----
-
-### Task 18: Agent Git Workflow Rules Setup & Full Repository Sync
-* **Date & Time**: 2026-09-26 22:45 IST
-* **Goal**: Establish mandatory agent workflow rules (always pull before starting, push after task completion, report timestamped push and notify user to pull, optimize pull if last pull is more recent than push) and synchronize both frontend and backend repositories with GitHub.
-* **Steps Taken**:
-  1. Updated `Boss/AGENTS.md` with explicit Git synchronization and workflow rules.
-  2. Created workspace agent rule `.agents/rules/git-workflow.md` for IDE-wide enforcement across turns.
-  3. Pulled latest changes in `BMS-opd-be` (`origin/main`, updated `controller/appointmentController.js` at commit `dbe7ae4`).
-  4. Pulled, rebased, and pushed `BMS-opd-fe` changes (`origin/Sohel2`, commit `4e9574e`).
-  5. Both repositories verified clean and 100% up to date with remote.
+* **Tasks 9-18 Archive**: Doctor footer placement, QR, referrals, aiccloud deployment CLI, prescription fixes, opd routing, `throgendb` isolation on port 5001, and workspace Git workflow rules.
 
 ---
 
@@ -279,3 +267,26 @@
   4. **Build & Git Sync**:
      - Verified production build (`npm run build`) passed with 0 errors in 5.79s.
      - Committed (`11f9699`) and pushed `thyrogen` to `origin/main`.
+
+---
+
+### Task 34: Hero Video Showcase with 3D Core Fallback, SaaS Admin Redesign, RBAC Matrix, Multilingual Support & VPS Deployment
+* **Date & Time**: 2026-09-27 19:15 IST
+* **Goal**: Expand hero section with up to 3 short video reels (autoplay, audio toggle, play/pause) with seamless fallback to Three.js 3D Diagnostic Core Orb; rebuild Admin Dashboard into a modern SaaS portal with persistent sidebar navigation and comprehensive Role-Based Access Control (RBAC); provide full multilingual localization (English, Bengali, Hindi); eliminate null/undefined runtime bugs; and deploy live to VPS.
+* **Steps Taken**:
+  1. **Hero Video Showcase & 3D Core Fallback**:
+     - Extended `SiteSettings` with `heroVideos` array (`id`, `url`, `title`, `posterUrl`).
+     - Enhanced `HeroVisualShowcase` in `src/components/site-pages.tsx`: autoplay (muted default), glowing audio un-mute toggle, play/pause controls, reel pill selector, and fallback to interactive `ThreeHeroOrb`.
+     - Added Promo Video Showcase management section in Admin Branding tab supporting up to 3 S3-hosted MP4 reels.
+  2. **Admin Dashboard SaaS Redesign & RBAC**:
+     - Created `src/lib/rbac.ts`: defined 5 user roles (`Super Admin`, `Center Admin`, `Pathologist / Lab In-Charge`, `Receptionist`, `Doctor`), default staff accounts, and dynamic tab access matrix.
+     - Redesigned `src/components/admin-components.tsx` with modern SaaS sidebar layout, categorized tabs, live role switcher, staff management table, and full 5x10 permission toggle matrix.
+  3. **Multilingual Support (i18n)**:
+     - Built `src/lib/i18n.tsx` with complete translations dictionary across English, Bengali (`বাংলা`), and Hindi (`हिंदी`).
+     - Added global `LanguageSelector` dropdown with Globe icon in desktop header and mobile drawer.
+  4. **Null-Safety & Bug Fixes**:
+     - Resolved property indexing errors in Supabase clients and optional property handling in appointment and home collection routes.
+     - Hardened prescription lookups and visitor analytics null safety.
+  5. **Build & Live VPS Deployment**:
+     - Verified production build (`npm run build` passed with exit code 0).
+     - Deployed via `Boss/deploy-thyrogen-now.js` to VPS `148.113.6.25:20172`. PM2 `thyrogen-website` restarted and verified `online` (HTTP 200 OK at `https://thyrogendiagnostic.in`).
