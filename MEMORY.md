@@ -6,50 +6,7 @@
 
 ## [2026-09-24 ~ 2026-09-25] aiccloud VPS Deployment & Troubleshooting
 
-* **Tasks 9-23 Archive**: Doctor footer placement, QR, referrals, aiccloud deployment CLI, prescription fixes, opd routing, `throgendb` isolation, workspace Git workflow, website foundation, Supabase schema layer, doctor chamber booking, live referral API bridge, pathology/radiology/packages catalogues.
-
----
-
-### Task 24: ThyroGen Website - Phase 6 Reports & Doorstep Phlebotomy, UI/UX Enhancements & Phase 7 Admin Portal
-* **Date & Time**: 2026-09-27 06:40 IST
-* **Goal**: Implement Phase 6 (online reports portal & doorstep home collection), enhance UI/UX across all catalogues and appointment forms, and deliver Phase 7 comprehensive staff/admin management console.
-* **Steps Taken**:
-  1. Built `src/components/report-components.tsx`:
-     - `ReportsPortal`: Secure lookup by registered phone & bill number/receipt code via `lookupReport` RPC, downloadable report metadata, physical collection guidelines.
-     - `HomeCollectionPortal`: Patient demographics, address, pincode (default `742202`), date/time window, fasting indicator, quick-add test chips (CBC, Thyroid, Lipid, Glucose, HbA1c, LFT, KFT), and direct WhatsApp booking.
-  2. Implemented `MobileQuickBar` in `src/components/site-shell.tsx` and wired into `src/routes/__root.tsx`.
-  3. UI/UX Enhancements & Cross-linking:
-     - Clear `(X)` buttons in search bars across Pathology, Radiology, Packages, and Doctors.
-     - Separated zero-hallucination database empty state from zero-match search query state with reset buttons.
-     - Added specialty filters and search bar to `DoctorDirectory`.
-     - Direct pre-filling: test detail links to `/home-collection?test=...`, radiology detail links to `/appointment?service=...`, package cards link to `/home-collection?test=...`.
-     - WhatsApp direct booking cards with pre-filled inquiries across appointment and home collection forms.
-  4. Built Phase 7 Staff & Admin Portal:
-     - `src/components/admin-components.tsx` & `src/routes/admin.tsx`.
-     - Includes KPI metrics, Appointments desk (status updates: confirmed, completed, cancelled), Home Collections desk, Doctor chamber manager, Pathology test & pricing manager, and Patient Report publisher.
-  5. Verified all 11 routes (`/`, `/about`, `/contact`, `/doctors`, `/tests`, `/radiology`, `/packages`, `/appointment`, `/reports`, `/home-collection`, `/admin`) return HTTP 200 OK.
-  6. Verified production build (`npm run build` completed cleanly in 1.97s).
-  7. Committed (`760d8d9`) and pushed to `thyrogen` GitHub `origin/main`.
-
----
-
-### Task 25: Live ThyroGen Doctor API & Referral Appointment Integration
-* **Date & Time**: 2026-09-27 06:48 IST
-* **Goal**: Switch Doctor Directory, Doctor Details, and Appointment Booking to live ThyroGen APIs (`/api/v1/user/doctors`, `/api/v1/user/doctor/:id`, and `/api/v1/referral/book`).
-* **Steps Taken**:
-  1. Tested and verified live public endpoints at `https://thyrogendiagnostic.in/api/v1`:
-     - `GET /user/doctors`: returns active specialist doctors (Dr. Tarikul Alam, Dr. Romy Saikh) with qualifications, fees, and avatars.
-     - `GET /user/doctor/:id`: returns individual doctor profiles.
-     - `POST /referral/book`: registers referral appointment with target doctor and returns tracking token (`REF-XXXXX`).
-  2. Updated `src/lib/services.ts`:
-     - `fetchDoctors()` maps backend schema (`firstName`, `lastName`, `docAvatar`, `visitingFee`, `doctorDepartment`) to `Doctor` interface.
-     - `fetchDoctorById(id)` queries live endpoint with fallback.
-     - `bookAppointment()` forwards patient demographics, doctor ID/name, department, and symptoms to `/referral/book`.
-  3. Updated TanStack Router routes (`src/routes/doctors.index.tsx`, `src/routes/doctors.$id.tsx`) with SSR route loaders.
-  4. Updated `src/components/appointment-form.tsx` to pass doctor department.
-  5. Verified SSR on `/doctors`: confirmed Dr. Tarikul Alam and Dr. Romy Saikh render dynamically.
-  6. Verified production build (`npm run build` passed with 0 errors).
-  7. Committed (`eeebbac`) and pushed `thyrogen` to `origin/main`.
+* **Tasks 9-25 Archive**: Doctor footer placement, QR, referrals, aiccloud deployment CLI, prescription fixes, opd routing, `throgendb` isolation, workspace Git workflow, website foundation, Supabase schema layer, chamber booking, live referral API bridge, pathology/radiology/packages catalogues, reports & doorstep phlebotomy portal, admin portal, and live doctor API integration.
 
 ---
 
@@ -273,4 +230,32 @@
      - Deployed live to VPS via `deploy-thyrogen-now.js` (PM2 `thyrogen-website` restarted and verified online).
      - Verified `GET /site-api/site-settings` (HTTP 200 OK) and homepage `https://thyrogendiagnostic.in` (HTTP 200 OK).
      - Committed (`71a6374`) and pushed `thyrogen` to `origin/main`.
+
+---
+
+### Task 37: Brand Aesthetic Transformation - Maroon, Grassy Green & Sky Blue Glow
+* **Date & Time**: 2026-09-27 20:56 IST
+* **Goal**: Refine entire website color palette to clinical Maroon primary, fresh Grassy Green secondary/accents, and electric Sky Blue glowing auras, rings, and 3D visual effects.
+* **Steps Taken**:
+  1. **Design System & CSS Custom Properties**:
+     - Updated `src/styles.css` with OKLCH tokens:
+       - `--primary` / `--maroon`: `oklch(0.38 0.16 25)` (rich royal maroon `#801429`) in light mode; `oklch(0.55 0.19 25)` in dark mode.
+       - `--secondary` / `--accent` / `--grass`: `oklch(0.58 0.18 142)` (fresh meadow grass green `#22c55e` / `#16a34a`).
+       - `--ring` / `--sky-glow`: `oklch(0.72 0.16 220)` (radiant sky blue glow `#38bdf8`).
+     - Added utility classes: `.glow-sky`, `.glow-sky-lg`, `.glow-sky-border`, `.glow-sky-pill`, `.badge-maroon`, `.badge-grass`.
+  2. **Three.js 3D Visuals Color Harmony**:
+     - `three-background.tsx`: Particle constellation rendered with rich Maroon (`0x9f1239`, `0x881337`), fresh Grassy Green (`0x22c55e`, `0x16a34a`), and radiant Sky Blue (`0x38bdf8`, `0x0ea5e9`).
+     - `three-hero-orb.tsx`: Inner core in Sky Blue wireframe and light sphere, Gimbal Ring 1 in deep Maroon (`0x9f1239`), Gimbal Ring 2 in Grassy Green (`0x22c55e`), outer ring in Sky Blue (`0x38bdf8`), and alternating orbiting nodes.
+     - `three-wave-divider.tsx`: Undulating grid lerping smoothly across Maroon, Grassy Green, and Sky Blue crests.
+  3. **Hero Section & Shell Accents**:
+     - Enhanced Hero visual card frame with radiant ambient sky blue radial aura (`from-sky-400/40 via-cyan-400/15 to-transparent blur-3xl`).
+     - Styled Primary CTA in deep Maroon with hover sky-blue glow (`hover:shadow-[0_0_25px_rgba(56,189,248,0.5)]`).
+     - Styled Secondary CTA in Grassy Green outline pill (`border-emerald-600/40 text-emerald-800 hover:bg-emerald-600 hover:text-white`).
+     - Announcement banner and BrandMark rendered in rich Maroon with pulsing emerald indicator.
+  4. **Build, VPS Deployment & Git Sync**:
+     - Verified production build (`npm run build` completed in 2.26s with 0 errors).
+     - Deployed live to aiccloud VPS via `deploy-thyrogen-now.js` (PM2 `thyrogen-website` restarted online).
+     - Verified homepage `https://thyrogendiagnostic.in` (HTTP 200 OK).
+     - Committed (`44cca0e`) and pushed `thyrogen` to `origin/main`.
+
 
