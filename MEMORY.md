@@ -265,4 +265,34 @@
      - Verified HTTP 200 OK on live server (`https://aiccloud.in`).
      - Committed (`890fac1`) and pushed `thyrogen` to `origin/main`.
 
+---
+
+### Task 40: 5-Reel Hero Video Showcase with Live Progress Bars, Captions & Admin Reordering
+* **Date & Time**: 2026-09-27 23:10 IST
+* **Goal**: Expand Hero Video Showcase up to 5 short video reels (~10s each), sequential autoplay with linear progress countdown on top tabs, editable titles and captions, admin reordering and upload to S3, and deploy live to VPS.
+* **Steps Taken**:
+  1. **Configured & Verified 5 S3 MP4 Video Reels**:
+     - Reel 1: Automated Pathology Core (`videos/reel1_analyzer.mp4`)
+     - Reel 2: Digital Radiology & USG Suite (`videos/reel2_radiology.mp4`)
+     - Reel 3: Doorstep Phlebotomy Service (`videos/reel3_phlebotomy.mp4`)
+     - Reel 4: Visiting Specialist OPD Chamber (`videos/reel4_consultation.mp4`)
+     - Reel 5: Emergency Diagnostic Triage (`videos/reel5_emergency.mp4`)
+  2. **Extended Schema & Defaults** (`src/lib/site-settings.ts`):
+     - Added `caption?: string` to `HeroVideo` interface.
+     - Configured default settings with all 5 reels with clinical descriptions.
+  3. **Upgraded Hero Showcase** (`src/components/site-pages.tsx`):
+     - Added top video switcher tabs (`Reel 1` to `Reel 5`) with live linear progress fill animation.
+     - Continuous auto-play sequence advancing on video end or 10s ticker.
+     - Glassmorphic caption card, live indicator badge, and controls (Play/Pause, Mute/Unmute, Prev/Next).
+     - Hover pause so visitors can comfortably view without abrupt transitions.
+  4. **Upgraded Admin Panel** (`src/components/admin-components.tsx`):
+     - Updated limit from 3 to 5 reels (`X / 5 Videos Configured`).
+     - Added caption field to video creator and inline title/caption editing on configured cards.
+     - Added Move Up / Move Down buttons for reordering and S3 MP4 direct file upload.
+  5. **Build, Live VPS Deployment & Git Sync**:
+     - Verified `npm run build` completed with 0 errors (built in 2.23s).
+     - Deployed live to VPS via `deploy-thyrogen-now.js` (PM2 `thyrogen-website` restarted online).
+     - Live verification: `https://aiccloud.in` (HTTP 200 OK).
+     - Committed (`8fc7935`) and pushed `thyrogen` to `origin/main`.
+
 
