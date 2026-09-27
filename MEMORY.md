@@ -267,3 +267,24 @@
   5. Subdomain Migration Preparation: Formulated complete zero-downtime routing plan to move OPD web app to `https://opd.thyrogendiagnostic.in` (proxying to port 5001 / `throgendb`) and host website on root `https://thyrogendiagnostic.in`.
   6. Verified production build (`npm run build`) and pushed `thyrogen` (`8f0d8fa`) to `origin/main`.
 
+---
+
+### Task 31: Multi-Domain Live Deployment (`thyrogendiagnostic.in` & `opd.thyrogendiagnostic.in`)
+* **Date & Time**: 2026-09-27 12:12 IST
+* **Goal**: Deploy ThyroGen website to root domain `https://thyrogendiagnostic.in/`, migrate BMS OPD application strictly to `https://opd.thyrogendiagnostic.in/`, and preserve `https://opd.biomechasoft.in/`.
+* **Steps Taken**:
+  1. **Node SSR Compatibility**: Added WebSocket dummy polyfill in `src/server.ts` and SSR-safe auth config in `src/lib/supabase.ts` for Node.js < 22 SSR compatibility on VPS.
+  2. **Production Builds**: Built `thyrogen` with Nitro `node-server` preset (`.output`) and `BMS_OPD` frontend (`dist`).
+  3. **PM2 Process**: Registered and started PM2 process `thyrogen-website` listening on internal port `3002`.
+  4. **Nginx Multi-Domain Routing**:
+     - `thyrogendiagnostic.in` & `www.thyrogendiagnostic.in`: proxies SSR to `127.0.0.1:3002`, static assets to `/root/thyrogen-website/public/assets`, and public API/uploads to `127.0.0.1:5001`.
+     - `opd.thyrogendiagnostic.in`: serves `/root/thyrogen-opd-fe`, proxies `/api` and `/uploads` to `127.0.0.1:5001`.
+     - `opd.biomechasoft.in`: serves `/root/BMS-opd-fe`, proxies `/api` and `/uploads` to `127.0.0.1:5000`.
+     - `biomechasoft.in`: 301 redirects to `https://opd.biomechasoft.in$request_uri`.
+  5. **Verification**:
+     - `https://thyrogendiagnostic.in/`: HTTP 200 OK (52KB SSR React + Three.js Website).
+     - `https://thyrogendiagnostic.in/doctors` & `/tests`: HTTP 200 OK (SSR with live 917 tests & doctors).
+     - `https://opd.thyrogendiagnostic.in/`: HTTP 200 OK (OPD Web Application).
+     - `https://opd.biomechasoft.in/`: HTTP 200 OK (BMS OPD Web Application).
+  6. Pushed commits to `thyrogen` (`78fdcf6`) and `Boss` (`origin/main`).
+
