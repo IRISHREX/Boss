@@ -6,37 +6,7 @@
 
 ## [2026-09-24 ~ 2026-09-25] aiccloud VPS Deployment & Troubleshooting
 
-
-
-
-
-### Task 9: Doctor Footer Placement & Form Field Tweak
-* **Date & Time**: 2026-09-25 10:20 ~ 10:35 IST
-* **Summary**: Fixed doctor footer banner rendering in `signImage`. Separated `AddNewDoctor.jsx` inputs into Signature and Footer images. Migrated Dr. Tarikul Alam doc on MongoDB VPS to `footerImage`. Updated `MyDocument.jsx` and `Preview.jsx`.
-
----
-
-### Task 10: General Settings Branding, Location QR Code & Template Builder Fix
-* **Date & Time**: 2026-09-25 11:00 ~ 11:35 IST
-* **Summary**: Fixed HTTP 413 on VPS (50M client_max_body_size), resolved TemplateBuilder immutable state error, implemented `/api/v1/settings/general` schema/controller, built `OrganizationSettings.jsx` with Google Location QR generator, and updated receipt/prescription branding hierarchy. Redeployed to VPS.
-
----
-
-### Task 11: Receipt Serial Numbers, Multi-Step Referral & Report Data Mismatch Fix
-* **Date & Time**: 2026-09-25 13:00 ~ 13:30 IST
-* **Summary**: Added doctor-wise daily serial numbers to receipts. Fixed patient data mismatch in reports where shared phone numbers displayed same patient name by prioritizing `r.appointmentId?.name`. Implemented missing `/api/v1/user/patients` route. Built 3-step referral wizard. Redeployed and pushed.
-
----
-
-### Task 12: Prescription Save and Recipient Notification Reliability
-* **Date & Time**: 2026-09-25 18:16 IST
-* **Summary**: Fixed misleading prescription-save error by resolving message-validation failures with missing `firstName`. Updated `Prescription.jsx` to resolve doctor recipient, separate save errors from UI warnings, and handle status notifications.
-
----
-
-### Task 13: aiccloud VPS Redeployment & Git Synchronization
-* **Date & Time**: 2026-09-25 18:30 ~ 18:50 IST
-* **Summary**: Rebuilt frontend and backend, deployed to aiccloud VPS (`https://biomechasoft.in`), verified PM2/Nginx status, and pushed commits to `BMS-opd-be`, `BMS-opd-fe`, and `BMS-OPD`.
+* **Tasks 9-13 Archive**: Doctor footer placement (`footerImage`), General settings location QR, Receipt serial numbers & multi-step referral wizard, Prescription save message-validation fixes, and aiccloud VPS redeployment.
 
 ---
 
@@ -286,3 +256,20 @@
   4. Added test counts to category pills (`All Categories (689)`, `Biochemistry (142)`, etc.) and multi-criteria sorting.
   5. Implemented search filter and 18-items/page pagination for Pathology Test Management in `src/components/admin-components.tsx`.
   6. Verified production build (`npm run build` passed with 0 errors) and pushed `thyrogen` (`f3219ec`) to `origin/main`.
+
+---
+
+### Task 29: Admin Packages Management, Home Collection Queue & Visitor Geolocation Analytics
+* **Date & Time**: 2026-09-27 07:28 IST
+* **Goal**: Enable Admin to create/manage preventive health packages, reliably process home collection requests, prompt visitors for location permission, and display IP/GPS view analytics in Admin dashboard.
+* **Steps Taken**:
+  1. Built visitor analytics engine (`src/lib/visitor-analytics.ts`) with IP lookup (`ipwho.is`), HTML5 GPS geolocation coordinates, device/browser telemetry, and `useVisitorAnalytics` hook.
+  2. Built non-intrusive floating permission banner `LocationVisitorPrompt` (`src/components/location-prompt.tsx`) and integrated into root layout (`src/routes/__root.tsx`).
+  3. Added `DEFAULT_HEALTH_PACKAGES` and hybrid storage (`localStorage` + Supabase sync) for preventive health packages (`createPackage`, `fetchPackages`) and home collections in `src/lib/services.ts`.
+  4. Added "Analytics" and "Packages" tabs to Admin Portal (`src/components/admin-components.tsx`):
+     - Real-time visitor metrics (unique sessions, location opt-in %, device breakdown, top cities, top viewed paths).
+     - Live visitor session table with high-precision GPS coordinates and clickable Google Maps links.
+     - Add Package creator form and package card manager.
+     - Home collection booking status filter pills (`All`, `Pending`, `Confirmed`, `Collected`, `Cancelled`) and quick actions.
+  5. Verified production build (`npm run build` passed with 0 errors) and pushed `thyrogen` (`6a52573`) to `origin/main`.
+
