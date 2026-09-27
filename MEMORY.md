@@ -42,19 +42,7 @@
 
 ### Task 14: Dynamic Deployment CLI (`aiccloud-deployment`) Creation & Verification
 * **Date & Time**: 2026-09-25 18:55 ~ 19:15 IST
-* **Goal**: Build dynamic deployment package in `aiccloud-deployment` supporting interactive local path configuration, file staging display (`npm run add be/fe`), automated build/git push/deployment (`npm run push be/fe`), and deployment status & 3-line log reporting (`npm run report be/fe`).
-* **Steps Taken**:
-  1. Created `aiccloud-deployment/package.json` with scripts (`setup`, `add`, `add:be`, `add:fe`, `push`, `push:be`, `push:fe`, `report`, `report:be`, `report:fe`).
-  2. Implemented `config.js` with interactive prompt fallback for `LOCAL_PROJECT_ROOT`, `LOCAL_BACKEND_PATH`, and `LOCAL_FRONTEND_PATH`.
-  3. Implemented `sshClient.js` with automated retry, authentication, and node-ssh fallback resolution.
-  4. Implemented `history.js` with JSON-backed deployment auditing (`deployment-state.json`).
-  5. Implemented `cli.js` supporting:
-     - `add be` / `add fe`: stages files and clearly displays file status in terminal with git summary.
-     - `push be`: commits/pushes to `origin/main`, uploads to VPS excluding `node_modules` and `.git`, installs dependencies, restarts PM2, and tails startup logs.
-     - `push fe`: commits/pushes to `origin/Sohel2`, runs `npm run build`, uploads `dist/` to VPS, and restarts Nginx.
-     - `report be` / `report fe` / `report`: connects to VPS and outputs last deployment timestamp along with the last 3 stdout and stderr/access log lines.
-  6. Verified CLI commands (`npm run report:be`, `npm run report:fe`, `add be`, `add fe`). All succeeded with clean outputs.
-  7. Updated `AGENTS.md` to document the dynamic deployment workflow.
+* **Summary**: Created dynamic deployment CLI in `aiccloud-deployment` supporting `setup`, `add be/fe`, `push be/fe`, and `report be/fe` with automated SSH, error handling, PM2/Nginx restarts, and 3-line log reporting. Verified all CLI commands.
 
 ---
 
@@ -280,6 +268,28 @@
   3. Verified production build (`npm run build`) passed with 0 errors.
   4. Verified local routes `/tests` and `/radiology` returning HTTP 200 OK with live data.
   5. Committed (`61dcc3c`) and pushed `thyrogen` to `origin/main`.
+
+---
+
+### Task 27: Admin Branding & Hero Management, Test Additions & Three.js 3D Visuals
+* **Date & Time**: 2026-09-27 07:08 IST
+* **Goal**: Implement live editable branding (Name, Logo, Phone, Address), Hero section content (headline, badge, subtext, CTAs, banner image), custom test additions in Admin Dashboard, and Three.js 3D live movable background, interactive diagnostic core, and wave ribbon.
+* **Steps Taken**:
+  1. Installed `three` and `@types/three`.
+  2. Built `src/lib/site-settings.ts`: reactive settings store with `localStorage` persistence, custom event synchronization, and `useSiteSettings` hook.
+  3. Created Three.js 3D components:
+     - `src/components/three/three-background.tsx`: full-screen responsive 3D particle constellation and bio-lattice with smooth lerped mouse parallax.
+     - `src/components/three/three-hero-orb.tsx`: interactive 3D holographic diagnostic core with rotating icosahedron nucleus, dual orbital gimbal rings, and orbiting nodes.
+     - `src/components/three/three-wave-divider.tsx`: 3D undulating medical telemetry wave grid responding to cursor velocity.
+  4. Updated layout and homepage:
+     - `src/routes/__root.tsx`: wired `ThreeMovableBackground` into root shell.
+     - `src/components/site-shell.tsx`: wired dynamic brand name, logo image, phone, address, and announcement banner.
+     - `src/components/site-pages.tsx`: integrated dynamic hero headline, badge, subtitle, CTAs, `ThreeHeroOrb`, and `ThreeWaveDivider`.
+  5. Enhanced `src/components/admin-components.tsx`:
+     - Added "Branding & Hero (Live)" management tab with full controls, file uploaders, 3D visual toggles, and instant live preview.
+     - Updated test & doctor creation to persist in local custom storage and merge seamlessly with live catalogues.
+  6. Verified production build (`npm run build` passed with 0 errors) and tested routes `/` and `/admin` (HTTP 200).
+  7. Committed (`aedc144`) and pushed `thyrogen` to `origin/main`.
 
 
 
