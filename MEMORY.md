@@ -12,47 +12,19 @@
 
 ### Task 9: Doctor Footer Placement & Form Field Tweak
 * **Date & Time**: 2026-09-25 10:20 ~ 10:35 IST
-* **Goal**: Fix doctor's footer image rendering in place of signature/stamp while default blue footer was still appearing at bottom.
-* **Root Cause**: `AddNewDoctor.jsx` mislabeled the `signImage` input as "Footer Image (optional)" and lacked a `footerImage` input, storing the footer banner in `signImage`.
-* **Steps Taken**:
-  1. Updated `AddNewDoctor.jsx`: separated inputs into "Signature Image (optional)" and "Footer Image (optional)" with full preview and submit support.
-  2. Migrated Dr. Tarikul Alam's document in MongoDB on VPS: moved the ThyroGen banner from `signImage` to `footerImage` and set `signImage: null`.
-  3. Updated `MyDocument.jsx` and `Preview.jsx`: ensured custom doctor footer replaces `/Footer.png` at the bottom and does not appear in credentials section.
+* **Summary**: Fixed doctor footer banner rendering in `signImage`. Separated `AddNewDoctor.jsx` inputs into Signature and Footer images. Migrated Dr. Tarikul Alam doc on MongoDB VPS to `footerImage`. Updated `MyDocument.jsx` and `Preview.jsx`.
 
 ---
 
-### Task 10: General Settings Branding, Location QR Code, Receipt/Prescription Hierarchy & Template Builder Fix
+### Task 10: General Settings Branding, Location QR Code & Template Builder Fix
 * **Date & Time**: 2026-09-25 11:00 ~ 11:35 IST
-* **Goal**: Fix HTTP 413 error and TemplateBuilder state mutation error, implement Organization Settings with Location QR code, uploadable Default Header & Footer, and apply branding hierarchy across Prescriptions and Receipts.
-* **Steps Taken**:
-  1. **Fixed HTTP 413 on VPS**: Added `client_max_body_size 50M;` to Nginx config and reloaded. Updated prescription saving flow to store structured JSON data in MongoDB with rolling 3-version retention, generating PDFs client-side on demand for fast, lightweight storage.
-  2. **Fixed TemplateBuilder Error**: Resolved `TypeError: Cannot assign to read only property 'prescriptionTemplate'` by updating React context state immutably (`setAdmin(prev => ({ ...prev, prescriptionTemplate: tmpl.name }))`).
-  3. **Backend General Settings API**: Created `generalSettingsSchema.js`, `generalSettingsController.js`, and `generalSettingsRouter.js` mounted at `/api/v1/settings/general` with multer upload middleware (`uploadClinicImagesDisk`) and S3 background sync.
-  4. **Frontend Organization & Branding UI**: Added `OrganizationSettings.jsx` inside `ThemeSettings.jsx` providing editable clinic details (Org Name, Reg No, Address, Owner, Platform Fee, Google Location URL), live Location QR code generator (`qrcode`), and image uploaders for Default Header & Footer.
-  5. **Prescription Branding Hierarchy**: Updated `Preview.jsx` and PDF templates to use `doctor.headerImage || generalSettings.defaultHeaderImage` and `doctor.footerImage || generalSettings.defaultFooterImage`.
-  6. **Receipt / Invoice Branding**: Updated OPD receipts in `Appointment.jsx` and `ReportsPage.jsx` using `generalSettingsUtil.js` to render the Default Header, Organization details, Platform Fee, Google Location QR code, and Default Footer.
-  7. **Redeployment & Git Push**: Built frontend, deployed backend and frontend to aiccloud VPS (`https://biomechasoft.in`), verified live API response, and pushed all commits to GitHub.
+* **Summary**: Fixed HTTP 413 on VPS (50M client_max_body_size), resolved TemplateBuilder immutable state error, implemented `/api/v1/settings/general` schema/controller, built `OrganizationSettings.jsx` with Google Location QR generator, and updated receipt/prescription branding hierarchy. Redeployed to VPS.
 
 ---
 
-### Task 11: Receipt Serial Numbers, Multi-Step Referral, Prescription Details & Report Data Mismatch Fix
+### Task 11: Receipt Serial Numbers, Multi-Step Referral & Report Data Mismatch Fix
 * **Date & Time**: 2026-09-25 13:00 ~ 13:30 IST
-* **Goal**:
-  1. Add Doctor-wise Day-wise serial numbers (`#01`, `#02` and `REC-YYYYMMDD-DOC-XX`) to OPD receipts with Header, Footer, and Location QR code.
-  2. Transform Create Referral into a 3-step wizard with step indicators and validation.
-  3. Ensure downloadable prescription uses selected default template and renders all clinical/demographic details.
-  4. Resolve data mismatch between Dashboard Appointments and Reports table (MINA KHATUN appearing for multiple patients).
-* **Root Causes & Solutions**:
-  1. **Data Mismatch in Reports**: When multiple family members booked appointments using the same phone (`9749626905`), they shared MINA KHATUN's User `patientId`. In `ReportsPage.jsx`, patient name checked `r.patientId` first, rendering "MINA KHATUN" for AZAHARUDDIN and ABDUL ALIM. Fixed by prioritizing `r.appointmentId?.name`.
-  2. **Payment Status Discrepancy**: ABDUL ALIM was marked "Completed" in appointments, which auto-synced the report status to "Paid". Because ABDUL ALIM was mistakenly displaying as "MINA KHATUN", it looked like Mina Khatun was "Paid" in Reports while "Pending" on Dashboard. Correcting the name completely aligned both views.
-  3. **Total Patients: 0**: `ReportsPage.jsx` called `/api/v1/user/patients` which was missing on backend. Implemented `getAllPatients` and route `/user/patients` in `userController.js` and `userRouter.js`.
-  4. **Multi-Step Referral**: Created `CreateReferralTab.css` and updated `CreateReferralTab.jsx` with a responsive 3-step wizard.
-  5. **Receipt Serial**: Updated `invoiceController.js` and `generalSettingsUtil.js` to compute daily doctor serials and embed QR code.
-  6. **Prescription Download**: Updated `prescriptionSchema.js`, `prescriptionController.js`, and `DownloadPrescriptionModal.jsx` to persist and load template and all clinical fields.
-* **Redeployment**:
-  - Rebuilt frontend with `npm run build`.
-  - Deployed BE and FE to aiccloud VPS (`https://biomechasoft.in`).
-  - Committed & pushed `BMS-opd-be` (`origin/main`) and `BMS-opd-fe` (`origin/Sohel2`).
+* **Summary**: Added doctor-wise daily serial numbers to receipts. Fixed patient data mismatch in reports where shared phone numbers displayed same patient name by prioritizing `r.appointmentId?.name`. Implemented missing `/api/v1/user/patients` route. Built 3-step referral wizard. Redeployed and pushed.
 
 ---
 
@@ -285,6 +257,26 @@
   5. Verified all 11 routes (`/`, `/about`, `/contact`, `/doctors`, `/tests`, `/radiology`, `/packages`, `/appointment`, `/reports`, `/home-collection`, `/admin`) return HTTP 200 OK.
   6. Verified production build (`npm run build` completed cleanly in 1.97s).
   7. Committed (`760d8d9`) and pushed to `thyrogen` GitHub `origin/main`.
+
+---
+
+### Task 25: Live ThyroGen Doctor API & Referral Appointment Integration
+* **Date & Time**: 2026-09-27 06:48 IST
+* **Goal**: Switch Doctor Directory, Doctor Details, and Appointment Booking to live ThyroGen APIs (`/api/v1/user/doctors`, `/api/v1/user/doctor/:id`, and `/api/v1/referral/book`).
+* **Steps Taken**:
+  1. Tested and verified live public endpoints at `https://thyrogendiagnostic.in/api/v1`:
+     - `GET /user/doctors`: returns active specialist doctors (Dr. Tarikul Alam, Dr. Romy Saikh) with qualifications, fees, and avatars.
+     - `GET /user/doctor/:id`: returns individual doctor profiles.
+     - `POST /referral/book`: registers referral appointment with target doctor and returns tracking token (`REF-XXXXX`).
+  2. Updated `src/lib/services.ts`:
+     - `fetchDoctors()` maps backend schema (`firstName`, `lastName`, `docAvatar`, `visitingFee`, `doctorDepartment`) to `Doctor` interface.
+     - `fetchDoctorById(id)` queries live endpoint with fallback.
+     - `bookAppointment()` forwards patient demographics, doctor ID/name, department, and symptoms to `/referral/book`.
+  3. Updated TanStack Router routes (`src/routes/doctors.index.tsx`, `src/routes/doctors.$id.tsx`) with SSR route loaders.
+  4. Updated `src/components/appointment-form.tsx` to pass doctor department.
+  5. Verified SSR on `/doctors`: confirmed Dr. Tarikul Alam and Dr. Romy Saikh render dynamically.
+  6. Verified production build (`npm run build` passed with 0 errors).
+  7. Committed (`eeebbac`) and pushed `thyrogen` to `origin/main`.
 
 
 
