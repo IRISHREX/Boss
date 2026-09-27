@@ -146,49 +146,32 @@
 * **Date & Time**: 2026-09-27 05:58 IST
 * **Goal**: Implement Phase 2 database, authentication, and security foundation for ThyroGen.
 * **Steps Taken**:
-  1. Verified remote sync with `git pull origin main` (already up to date).
-  2. Installed `@supabase/supabase-js` without security vulnerabilities.
-  3. Created `supabase/migrations/20260927000000_init_thyrogen_schema.sql` and `supabase/schema.sql` with full relational PostgreSQL tables (`profiles`, `doctors`, `doctor_schedules`, `test_categories`, `lab_tests`, `radiology_services`, `packages`, `appointments`, `reports`, `home_collection_bookings`, `site_settings`).
-  4. Configured Row Level Security (RLS) policies for patient privacy, public viewing of active tests/doctors, and admin-only management.
-  5. Implemented safe Supabase client `src/lib/supabase.ts` with SSR and mock-safe fallback.
-  6. Implemented typed data access services `src/lib/services.ts` and Auth context/hook `src/lib/auth-context.tsx`.
-  7. Seeded verified diagnostic centre information and standard pathology categories.
-  8. Verified production build (`npm run build` completed with 0 errors).
-  9. Committed (`599a641`) and pushed to GitHub `origin/main`.
+  1. Created `supabase/migrations/20260927000000_init_thyrogen_schema.sql` and `supabase/schema.sql` with relational PostgreSQL tables (`profiles`, `doctors`, `doctor_schedules`, `test_categories`, `lab_tests`, `radiology_services`, `packages`, `appointments`, `reports`, `home_collection_bookings`, `site_settings`).
+  2. Configured RLS policies for patient privacy, public viewing of active items, and admin management.
+  3. Implemented safe Supabase client `src/lib/supabase.ts`, typed services `src/lib/services.ts`, and Auth context `src/lib/auth-context.tsx`.
+  4. Verified production build (`npm run build` passed) and committed (`599a641`) to `origin/main`.
 
 ---
 
 ### Task 21: ThyroGen Website - Phase 3 Doctor Chamber, Profiles & Appointment Booking
 * **Date & Time**: 2026-09-27 06:02 IST
-* **Goal**: Implement Phase 3 Doctor Directory, individual doctor profile routing, chamber schedules, and patient appointment booking form with zero-hallucination compliance.
+* **Goal**: Implement Doctor Directory, doctor profile routing, chamber schedules, and appointment booking form.
 * **Steps Taken**:
-  1. Verified remote sync with `git pull origin main` (already up to date).
-  2. Created `src/components/doctor-components.tsx`:
-     - `DoctorDirectory`: Loads active doctors from Supabase via `fetchDoctors()`. When database is empty, displays strictly required zero-hallucination notice *"No doctors have been added yet."* with quick call CTAs (`9134101587` & `8001101641`).
-     - `DoctorDetail`: Dynamic doctor profile route loading doctor by ID and chamber schedules per day of week with direct appointment action.
-  3. Created `src/components/appointment-form.tsx`:
-     - Responsive patient appointment booking form supporting patient name, 10-digit mobile, age, gender, doctor selection (dynamically populated with query parameter pre-selection), preferred date with min=today, time slot, and clinical symptoms/notes.
-     - Confirmation screen displaying booking details and helpline follow-up instructions.
-  4. Updated routes:
-     - `src/routes/doctors.index.tsx`: Wired to `DoctorDirectory` with complete SEO tags.
-     - `src/routes/doctors.$id.tsx`: Wired to `DoctorDetail` with param extraction.
-     - `src/routes/appointment.tsx`: Wired to `AppointmentBooking` with Zod search param validation.
-  5. Verified local build (`npm run build` completed with 0 errors) and dev server routes (`/doctors` and `/appointment` HTTP 200 OK).
-  6. Committed (`ca33f44`) and pushed to GitHub `origin/main`.
+  1. Created `src/components/doctor-components.tsx` (`DoctorDirectory` & `DoctorDetail`) with zero-hallucination notices and helpline CTAs (`9134101587` & `8001101641`).
+  2. Created `src/components/appointment-form.tsx`: responsive form with patient demographics, doctor selector, date/time pickers, symptoms, and confirmation screen.
+  3. Updated TanStack Router routes (`doctors.index.tsx`, `doctors.$id.tsx`, `appointment.tsx`).
+  4. Verified local build (`npm run build` passed) and committed (`ca33f44`) to `origin/main`.
 
 ---
 
 ### Task 22: ThyroGen Website - Phase 4 Live Referral API Bridge & Edge Function
 * **Date & Time**: 2026-09-27 06:05 IST
-* **Goal**: Bridge patient appointment booking directly with ThyroGen OPD backend (`POST https://thyrogendiagnostic.in/api/v1/referral/book`) via Supabase Edge Function isolation and resilient service fallback.
+* **Goal**: Bridge patient appointment booking directly with ThyroGen OPD backend (`POST https://thyrogendiagnostic.in/api/v1/referral/book`).
 * **Steps Taken**:
-  1. Verified remote sync with `git pull origin main` (already up to date).
-  2. Created Supabase Edge Function `supabase/functions/book-referral/index.ts` to bridge inbound web requests to backend referral desk on port 5001.
-  3. Updated `src/lib/services.ts` `bookAppointment` to sync with `https://thyrogendiagnostic.in/api/v1/referral/book` with an 8-second timeout, extracting the official OPD referral token (e.g. `REF-XXXXX`).
-  4. Updated `src/components/appointment-form.tsx` to prominently present the live token reference on the success confirmation card.
-  5. Tested live HTTP referral booking via Node: confirmed `success: true` and generation of tracking token `REF-1790469263572-10` from live backend.
-  6. Verified local production build (`npm run build` completed with 0 errors).
-  7. Committed (`82b07f5`) and pushed to GitHub `origin/main`.
+  1. Created Supabase Edge Function `supabase/functions/book-referral/index.ts` to bridge requests to backend referral desk on port 5001.
+  2. Updated `src/lib/services.ts` `bookAppointment` to sync with `/referral/book` (8s timeout), extracting official OPD referral tokens (`REF-XXXXX`).
+  3. Updated `src/components/appointment-form.tsx` to display live tracking token on booking confirmation.
+  4. Verified build (`npm run build` passed) and committed (`82b07f5`) to `origin/main`.
 
 ---
 
@@ -291,9 +274,15 @@
   6. Verified production build (`npm run build` passed with 0 errors) and tested routes `/` and `/admin` (HTTP 200).
   7. Committed (`aedc144`) and pushed `thyrogen` to `origin/main`.
 
+---
 
-
-
-
-
-
+### Task 28: Lazy Loading & Multi-Mode Pagination in Tests & Admin Desk
+* **Date & Time**: 2026-09-27 07:18 IST
+* **Goal**: Implement high-performance pagination and continuous lazy loading across 917 active diagnostic tests (Pathology & Radiology) and Admin Desk.
+* **Steps Taken**:
+  1. Built `CataloguePagination` in `src/components/catalogue-components.tsx` with dual modes: "Pages" (paged view) and "Lazy Scroll" (continuous stream).
+  2. Paged mode: range indicators, page size selector (12, 18, 24, 48), first/prev/next/last, page pills with ellipsis, and smooth scroll-to-top.
+  3. Lazy Scroll mode: progressive count, animated progress bar, "Load More" button, and `IntersectionObserver` sentinel for auto-load on scroll.
+  4. Added test counts to category pills (`All Categories (689)`, `Biochemistry (142)`, etc.) and multi-criteria sorting.
+  5. Implemented search filter and 18-items/page pagination for Pathology Test Management in `src/components/admin-components.tsx`.
+  6. Verified production build (`npm run build` passed with 0 errors) and pushed `thyrogen` (`f3219ec`) to `origin/main`.
