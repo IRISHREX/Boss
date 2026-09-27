@@ -258,4 +258,28 @@
      - Verified homepage `https://thyrogendiagnostic.in` (HTTP 200 OK).
      - Committed (`44cca0e`) and pushed `thyrogen` to `origin/main`.
 
+---
+
+### Task 38: Context-Aware WhatsApp Booking with Mandatory Name & Age Validation
+* **Date & Time**: 2026-09-27 21:12 IST
+* **Goal**: Build interactive patient context modal for WhatsApp bookings (mandatory Patient Name and Age, optional Phone and Address) with direct dispatch to both official helplines (9134101587 and 8001101641).
+* **Steps Taken**:
+  1. **Built `WhatsAppBookingModal` & `WhatsAppBookingButton`** (`src/components/whatsapp-booking-modal.tsx`):
+     - Validates mandatory Patient Name ($\ge 2$ chars) and Age (numeric, 1–125 yrs).
+     - Collects optional Contact Phone and Doorstep Address/Landmark.
+     - Displays prefilled Service/Test/Doctor context with category badge.
+     - Provides two direct action buttons for **Helpline 1 (`9134101587`)** and **Helpline 2 (`8001101641`)**.
+     - Generates structured, readable markdown messages with patient and service details.
+  2. **Integrated Across Catalogues & Portals**:
+     - `catalogue-components.tsx`: Added quick WhatsApp buttons on pathology test cards, Test Detail page, Radiology imaging detail, and Health Packages detail.
+     - `report-components.tsx`: Replaced direct link in `HomeCollectionPortal` sidebar with context modal prefilled with home collection test names and form inputs.
+     - `appointment-form.tsx`: Connected `AppointmentBooking` sidebar WhatsApp button with live doctor/service and form context.
+     - `doctor-components.tsx`: Added WhatsApp booking on doctor directory cards and doctor profiles.
+     - `site-shell.tsx` & `__root.tsx`: Added `FloatingWhatsAppLauncher` (desktop bottom-left with live pulse) and integrated WhatsApp booking into `MobileQuickBar`.
+  3. **Build, VPS Deployment & Git Sync**:
+     - Verified production build (`npm run build` completed with 0 errors).
+     - Deployed live to VPS via `deploy-thyrogen-now.js` (PM2 `thyrogen-website` restarted online).
+     - Verified HTTP 200 OK on live server (`https://aiccloud.in`).
+     - Committed (`0dda58f`) and pushed `thyrogen` to `origin/main`.
+
 
