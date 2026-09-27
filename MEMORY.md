@@ -6,26 +6,7 @@
 
 ## [2026-09-24 ~ 2026-09-25] aiccloud VPS Deployment & Troubleshooting
 
-* **Tasks 9-13 Archive**: Doctor footer placement (`footerImage`), General settings location QR, Receipt serial numbers & multi-step referral wizard, Prescription save message-validation fixes, and aiccloud VPS redeployment.
-
----
-
-### Task 14: Dynamic Deployment CLI (`aiccloud-deployment`) Creation & Verification
-* **Date & Time**: 2026-09-25 18:55 ~ 19:15 IST
-* **Summary**: Created dynamic deployment CLI in `aiccloud-deployment` supporting `setup`, `add be/fe`, `push be/fe`, and `report be/fe` with automated SSH, error handling, PM2/Nginx restarts, and 3-line log reporting. Verified all CLI commands.
-
----
-
-### Task 15: Fix Prescription Save "admin is not defined" ReferenceError & Redeploy
-* **Date & Time**: 2026-09-25 19:20 ~ 19:55 IST
-* **Goal**: Fix `ReferenceError: admin is not defined` thrown in frontend console when saving a prescription, and ensure full deployment to VPS.
-* **Root Cause**: `Prescription.jsx` line 1304 referenced `admin?.prescriptionTemplate`, but `admin` was never declared or selected from context/Redux in `Prescription.jsx`, causing `handleSave` to throw a client-side `ReferenceError` before sending the request.
-* **Steps Taken**:
-  1. Updated `Prescription.jsx`: imported `admin` from Redux auth slice (`const admin = useSelector((state) => state.auth?.admin);`).
-  2. Rebuilt production bundle (`npm run build`).
-  3. Re-uploaded frontend dist to `/root/BMS-opd-fe` on aiccloud VPS and restarted Nginx.
-  4. Verified live frontend (`HTTP 200 OK`) and live backend API (`POST / GET` responding).
-  5. Committed & pushed frontend changes (`e25f6fb`) to `BMS-opd-fe` (`origin/Sohel2`).
+* **Tasks 9-15 Archive**: Doctor footer placement, General settings location QR, Receipt serial numbers & referral wizard, Prescription save fixes, aiccloud dynamic deployment CLI creation, and VPS redeployment.
 
 ---
 
@@ -272,4 +253,17 @@
      - Add Package creator form and package card manager.
      - Home collection booking status filter pills (`All`, `Pending`, `Confirmed`, `Collected`, `Cancelled`) and quick actions.
   5. Verified production build (`npm run build` passed with 0 errors) and pushed `thyrogen` (`6a52573`) to `origin/main`.
+
+---
+
+### Task 30: Header Cleanup, Editable Tests with Photos, Package Grouping, Report Lookup Fix & Subdomain Migration Plan
+* **Date & Time**: 2026-09-27 08:35 IST
+* **Goal**: Refactor header into a clean layout (Home, Doctors, Tests, About + Services dropdown), make tests editable with photo presets in Admin desk, enable interactive test grouping with cumulative pricing for packages, fix scoping bug at line 353 in report lookup, and plan migration of OPD app to `https://opd.thyrogendiagnostic.in` while main domain serves website.
+* **Steps Taken**:
+  1. Header Navigation: Replaced crowded links with 4 core items outside (`Home`, `Doctors`, `Tests`, `About`) and a modern `Services ▾` dropdown containing secondary portals and links.
+  2. Test Desk & Photos: Added `image_url` to `LabTest`, presets selector (`TEST_PHOTO_PRESETS`), and editable modal with save handler (`handleSaveEditTest`). Public catalogue renders test image thumbnails.
+  3. Interactive Package Grouping: Added interactive test search and multi-test picker in Add Package modal. Automatically calculates cumulative MRP, offers one-click discount presets (20-50%), and auto-populates test checklist.
+  4. Prescription & Report Fix: Resolved variable scoping issue with `labRes` at line 353 of `report-components.tsx` with a boolean flag (`foundLabReports`). Verified build succeeds with 0 errors.
+  5. Subdomain Migration Preparation: Formulated complete zero-downtime routing plan to move OPD web app to `https://opd.thyrogendiagnostic.in` (proxying to port 5001 / `throgendb`) and host website on root `https://thyrogendiagnostic.in`.
+  6. Verified production build (`npm run build`) and pushed `thyrogen` (`8f0d8fa`) to `origin/main`.
 
