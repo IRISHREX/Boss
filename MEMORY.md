@@ -6,32 +6,7 @@
 
 ## [2026-09-24 ~ 2026-09-25] aiccloud VPS Deployment & Troubleshooting
 
-* **Tasks 9-18 Archive**: Doctor footer placement, QR, referrals, aiccloud deployment CLI, prescription fixes, opd routing, `throgendb` isolation on port 5001, and workspace Git workflow rules.
-
----
-
-### Task 19: ThyroGen Diagnostic & Health Care Unit Website - Phase 1 Foundation
-* **Date & Time**: 2026-09-27 05:40 IST
-* **Goal**: Implement Phase 1 of `https://github.com/IRISHREX/thyrogen.git` strictly adhering to zero-hallucination policy and verified business data.
-* **Steps Taken**:
-  1. Cloned `thyrogen` repository and installed dependencies cleanly with Vite 8 + TanStack Start.
-  2. Implemented `SiteHeader` with brand logo, desktop/mobile navigation, phone call actions (`9134101587`, `8001101641`), secondary CTA "Book Test", primary CTA "Book Appointment".
-  3. Implemented `SiteFooter` with Bengali address, verified helpline numbers, service/legal links, and Mehebub Dhuliyan association tag.
-  4. Implemented Home page sections: Hero, Services, Popular Tests (empty state pending DB), Health Packages (empty state pending DB), Doctor Chamber ("No doctors have been added yet"), How It Works (4 steps), and Contact.
-  5. Implemented zero-hallucination directory & detail routes across Pathology, Radiology, Packages, Doctors, Appointments, Reports, Home Collection, and Contact.
-  6. Verified local production build (`npm run build` completed with 0 errors).
-  7. Committed (`7b2d814`) and pushed to `main` branch on GitHub.
-
----
-
-### Task 20: ThyroGen Website - Phase 2 Supabase PostgreSQL Schema, RLS & Data Layer
-* **Date & Time**: 2026-09-27 05:58 IST
-* **Goal**: Implement Phase 2 database, authentication, and security foundation for ThyroGen.
-* **Steps Taken**:
-  1. Created `supabase/migrations/20260927000000_init_thyrogen_schema.sql` and `supabase/schema.sql` with relational PostgreSQL tables (`profiles`, `doctors`, `doctor_schedules`, `test_categories`, `lab_tests`, `radiology_services`, `packages`, `appointments`, `reports`, `home_collection_bookings`, `site_settings`).
-  2. Configured RLS policies for patient privacy, public viewing of active items, and admin management.
-  3. Implemented safe Supabase client `src/lib/supabase.ts`, typed services `src/lib/services.ts`, and Auth context `src/lib/auth-context.tsx`.
-  4. Verified production build (`npm run build` passed) and committed (`599a641`) to `origin/main`.
+* **Tasks 9-20 Archive**: Doctor footer placement, QR, referrals, aiccloud deployment CLI, prescription fixes, opd routing, `throgendb` isolation, workspace Git workflow, website phase 1 foundation, and Supabase schema layer.
 
 ---
 
@@ -290,3 +265,25 @@
   5. **Build & Live VPS Deployment**:
      - Verified production build (`npm run build` passed with exit code 0).
      - Deployed via `Boss/deploy-thyrogen-now.js` to VPS `148.113.6.25:20172`. PM2 `thyrogen-website` restarted and verified `online` (HTTP 200 OK at `https://thyrogendiagnostic.in`).
+
+---
+
+### Task 35: Admin 2FA OTP Route Fix, OPD Backend throgendb Connection & Hero Reels S3 Hosting
+* **Date & Time**: 2026-09-27 19:40 IST
+* **Goal**: Fix 404 error on `/api/admin-auth/send-otp`, resolve doctor API returning empty list by restoring `throgendb` in backend `dbConnection.js`, enlarge Hero visual showcase, host 3 diagnostic lab reels on S3, and deploy live.
+* **Steps Taken**:
+  1. **Admin OTP Routing Fix**:
+     - Diagnosed Nginx `/api` wildcard routing to port 5001 (Express backend) instead of 3002 (Nitro SSR website).
+     - Added dedicated Nginx route `location /api/admin-auth` proxying to `http://127.0.0.1:3002`.
+     - Updated `src/server.ts` and `src/lib/admin-auth-client.ts` to support dual prefixes (`/api/admin-auth` and `/site-api/admin-auth`) with automatic failover.
+  2. **OPD Backend throgendb Fix**:
+     - Identified `dbName: "MERN_STACK_HOSPITAL_MANAGEMENT"` hardcoded in `dbConnection.js`.
+     - Updated `/root/thyrogen-be/database/dbConnection.js` and `BMS-opd-be/database/dbConnection.js` to target `throgendb`.
+     - Verified `/api/v1/user/doctors` immediately returns Dr. Tarikul Alam and Dr. Romy Saikh.
+  3. **Hero Video Showcase Reels & S3 Hosting**:
+     - Generated 3 clinical diagnostic laboratory video reels (Automated Pathology, Digital Radiology, Doorstep Phlebotomy) and uploaded to S3 bucket `s3://aic-585105c0/videos/`.
+     - Configured `DEFAULT_HERO_VIDEOS` in `src/lib/site-settings.ts`.
+     - Enlarged Hero showcase dimensions to `max-w-7xl` container and `min-h-[440px]` display area with seamless 3D Core Orb fallback.
+  4. **Build, Deployment & Verification**:
+     - Built production bundle (`npm run build` completed in 2.57s) and deployed to VPS (`148.113.6.25:20172`).
+     - Live verification: `POST /api/admin-auth/send-otp` (200 OK), `/api/v1/user/doctors` (200 OK), and home page (200 OK).
