@@ -8,18 +8,7 @@
 
 
 
-### Task 8: Prescription PDF Storage (S3, 3-Version Rolling Retention) & Multi-View Downloads
-* **Date & Time**: 2026-09-25 09:30 ~ 10:15 IST
-* **Goal**: Enable direct PDF generation and saving to S3 disk storage, retaining up to 3 prescriptions per patient (same-day overwrites, >3 oldest purged). Add date-selection download modal across Dashboard, Reports, and Messages.
-* **Steps Taken**:
-  1. Updated `prescriptionSchema.js` with `pdfFiles` array (`date`, `s3Key`, `s3Url`, `savedAt`).
-  2. Implemented S3 helpers in `s3Storage.js` (`uploadPrescriptionPdfToS3`, `deleteS3Object`, `getPresignedDownloadUrl`). Installed `@aws-sdk/s3-request-presigner`.
-  3. Added backend routes in `prescriptionRouter.js` and controller functions in `prescriptionController.js` (`savePrescriptionPdf`, `listPrescriptionPdfs`).
-  4. Added `handleSavePdf` and "💾 Save PDF" button in `Preview.jsx`.
-  5. Created `DownloadPrescriptionModal.jsx` and `DownloadPrescriptionModal.css` for date-selection downloads via presigned URLs.
-  6. Added PDF download triggers in `Dashboard.jsx`, `ReportsPage.jsx`, and `Messages.jsx` (via `MessageCard.jsx` / `MessageList.jsx`).
 
----
 
 ### Task 9: Doctor Footer Placement & Form Field Tweak
 * **Date & Time**: 2026-09-25 10:20 ~ 10:35 IST
@@ -273,6 +262,30 @@
      - `src/routes/packages.index.tsx` & `src/routes/packages.$id.tsx`
   5. Tested dev server routes (`/tests`, `/radiology`, `/packages` all returning HTTP 200 OK) and verified production bundle with `npm run build` (0 errors).
   6. Committed (`9706c7b`) and pushed to GitHub `origin/main`.
+
+---
+
+### Task 24: ThyroGen Website - Phase 6 Reports & Doorstep Phlebotomy, UI/UX Enhancements & Phase 7 Admin Portal
+* **Date & Time**: 2026-09-27 06:40 IST
+* **Goal**: Implement Phase 6 (online reports portal & doorstep home collection), enhance UI/UX across all catalogues and appointment forms, and deliver Phase 7 comprehensive staff/admin management console.
+* **Steps Taken**:
+  1. Built `src/components/report-components.tsx`:
+     - `ReportsPortal`: Secure lookup by registered phone & bill number/receipt code via `lookupReport` RPC, downloadable report metadata, physical collection guidelines.
+     - `HomeCollectionPortal`: Patient demographics, address, pincode (default `742202`), date/time window, fasting indicator, quick-add test chips (CBC, Thyroid, Lipid, Glucose, HbA1c, LFT, KFT), and direct WhatsApp booking.
+  2. Implemented `MobileQuickBar` in `src/components/site-shell.tsx` and wired into `src/routes/__root.tsx`.
+  3. UI/UX Enhancements & Cross-linking:
+     - Clear `(X)` buttons in search bars across Pathology, Radiology, Packages, and Doctors.
+     - Separated zero-hallucination database empty state from zero-match search query state with reset buttons.
+     - Added specialty filters and search bar to `DoctorDirectory`.
+     - Direct pre-filling: test detail links to `/home-collection?test=...`, radiology detail links to `/appointment?service=...`, package cards link to `/home-collection?test=...`.
+     - WhatsApp direct booking cards with pre-filled inquiries across appointment and home collection forms.
+  4. Built Phase 7 Staff & Admin Portal:
+     - `src/components/admin-components.tsx` & `src/routes/admin.tsx`.
+     - Includes KPI metrics, Appointments desk (status updates: confirmed, completed, cancelled), Home Collections desk, Doctor chamber manager, Pathology test & pricing manager, and Patient Report publisher.
+  5. Verified all 11 routes (`/`, `/about`, `/contact`, `/doctors`, `/tests`, `/radiology`, `/packages`, `/appointment`, `/reports`, `/home-collection`, `/admin`) return HTTP 200 OK.
+  6. Verified production build (`npm run build` completed cleanly in 1.97s).
+  7. Committed (`760d8d9`) and pushed to `thyrogen` GitHub `origin/main`.
+
 
 
 
