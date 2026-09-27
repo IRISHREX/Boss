@@ -6,45 +6,7 @@
 
 ## [2026-09-24 ~ 2026-09-25] aiccloud VPS Deployment & Troubleshooting
 
-* **Tasks 9-25 Archive**: Doctor footer placement, QR, referrals, aiccloud deployment CLI, prescription fixes, opd routing, `throgendb` isolation, workspace Git workflow, website foundation, Supabase schema layer, chamber booking, live referral API bridge, pathology/radiology/packages catalogues, reports & doorstep phlebotomy portal, admin portal, and live doctor API integration.
-
----
-
-### Task 26: Live ThyroGen Test Directory Integration (917 Diagnostic & Radiology Tests)
-* **Date & Time**: 2026-09-27 06:56 IST
-* **Goal**: Connect Pathology Lab Tests and Radiology Services catalogues directly to live public ThyroGen API (`https://thyrogendiagnostic.in/api/v1/test`) returning 917 real tests, prices, and sample precautions.
-* **Steps Taken**:
-  1. Discovered and verified live public endpoint `GET /api/v1/test`: returns 917 active diagnostic tests (689 Pathology tests, 228 Radiology tests) with exact prices, sample types, precautions, and clinical departments.
-  2. Updated `src/lib/services.ts`:
-     - Added `getLiveTests()` with 60-second in-memory cache and 8-second timeout.
-     - Implemented `mapRawToLabTest()` and `mapRawToRadiology()` for zero-hallucination compliance.
-     - Updated `fetchTestCategories()` to dynamically extract active departments (Hematology, Biochemistry, Microbiology, Serology, Endocrinology, Histopathology, etc.).
-     - Updated `fetchLabTests()`, `fetchPopularLabTests()`, `fetchLabTestById()`, `fetchRadiologyServices()`, and `fetchRadiologyServiceById()` with live API data and fallback.
-  3. Verified production build (`npm run build`) passed with 0 errors.
-  4. Verified local routes `/tests` and `/radiology` returning HTTP 200 OK with live data.
-  5. Committed (`61dcc3c`) and pushed `thyrogen` to `origin/main`.
-
----
-
-### Task 27: Admin Branding & Hero Management, Test Additions & Three.js 3D Visuals
-* **Date & Time**: 2026-09-27 07:08 IST
-* **Goal**: Implement live editable branding (Name, Logo, Phone, Address), Hero section content (headline, badge, subtext, CTAs, banner image), custom test additions in Admin Dashboard, and Three.js 3D live movable background, interactive diagnostic core, and wave ribbon.
-* **Steps Taken**:
-  1. Installed `three` and `@types/three`.
-  2. Built `src/lib/site-settings.ts`: reactive settings store with `localStorage` persistence, custom event synchronization, and `useSiteSettings` hook.
-  3. Created Three.js 3D components:
-     - `src/components/three/three-background.tsx`: full-screen responsive 3D particle constellation and bio-lattice with smooth lerped mouse parallax.
-     - `src/components/three/three-hero-orb.tsx`: interactive 3D holographic diagnostic core with rotating icosahedron nucleus, dual orbital gimbal rings, and orbiting nodes.
-     - `src/components/three/three-wave-divider.tsx`: 3D undulating medical telemetry wave grid responding to cursor velocity.
-  4. Updated layout and homepage:
-     - `src/routes/__root.tsx`: wired `ThreeMovableBackground` into root shell.
-     - `src/components/site-shell.tsx`: wired dynamic brand name, logo image, phone, address, and announcement banner.
-     - `src/components/site-pages.tsx`: integrated dynamic hero headline, badge, subtitle, CTAs, `ThreeHeroOrb`, and `ThreeWaveDivider`.
-  5. Enhanced `src/components/admin-components.tsx`:
-     - Added "Branding & Hero (Live)" management tab with full controls, file uploaders, 3D visual toggles, and instant live preview.
-     - Updated test & doctor creation to persist in local custom storage and merge seamlessly with live catalogues.
-  6. Verified production build (`npm run build` passed with 0 errors) and tested routes `/` and `/admin` (HTTP 200).
-  7. Committed (`aedc144`) and pushed `thyrogen` to `origin/main`.
+* **Tasks 9-27 Archive**: Doctor footer, QR, referrals, aiccloud CLI, prescription fixes, opd routing, Supabase layer, live 917 tests integration, Three.js 3D background & orb, editable branding & hero management.
 
 ---
 
@@ -281,5 +243,26 @@
      - Deployed live to VPS via `deploy-thyrogen-now.js` (PM2 `thyrogen-website` restarted online).
      - Verified HTTP 200 OK on live server (`https://aiccloud.in`).
      - Committed (`0dda58f`) and pushed `thyrogen` to `origin/main`.
+
+---
+
+### Task 39: Doctor WhatsApp Booking with Prescription Upload & Condition-Based Test Recommendations
+* **Date & Time**: 2026-09-27 22:57 IST
+* **Goal**: Enable rich clinical context for WhatsApp bookings: doctor selection & date, prescription upload (photo/PDF to S3) with secure link, and condition-based test recommendations (Asthma, Diabetes, Cardiac, Thyroid, Fever, etc.) with custom search.
+* **Steps Taken**:
+  1. **Upgraded `WhatsAppBookingModal`** (`src/components/whatsapp-booking-modal.tsx`):
+     - **Prescription Attachment**: Supports image/camera photo and PDF uploads to S3/server via `uploadPhotoToS3(file, 'prescriptions')`. Generates public link appended into WhatsApp text with thumbnail preview and remove button. Completely optional.
+     - **Condition-Based Test Recommendations**: Built 9 clinical profiles (Diabetes, Asthma/Respiratory, Heart/BP, Thyroid, Liver/LFT, Kidney/KFT, Arthritis/Joints, Fever/Infection, Full Body Wellness) with pre-mapped investigations. 1-click checkboxes, select-all, and custom test search/chip adder. Completely optional.
+     - **Doctor Consultation**: Doctor selector with visiting schedule and time slot picker.
+     - **Mandatory Patient Name & Age Validation**: Strictly enforced before dispatch.
+     - **Direct Dispatch**: Dual buttons for Helpline 1 (`9134101587`) and Helpline 2 (`8001101641`).
+  2. **Connected Across Doctor & Consultation Pages**:
+     - Passed `doctorName` and `doctorId` in `DoctorDirectory` and `DoctorDetail` (`src/components/doctor-components.tsx`).
+     - Connected `AppointmentBooking` (`src/components/appointment-form.tsx`) passing doctor, service, and patient notes.
+  3. **Build, VPS Deployment & Git Sync**:
+     - Verified production build (`npm run build` completed with 0 errors).
+     - Deployed live to VPS via `deploy-thyrogen-now.js` (PM2 `thyrogen-website` restarted online).
+     - Verified HTTP 200 OK on live server (`https://aiccloud.in`).
+     - Committed (`890fac1`) and pushed `thyrogen` to `origin/main`.
 
 
