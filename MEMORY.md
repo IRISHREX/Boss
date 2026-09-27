@@ -6,35 +6,7 @@
 
 ## [2026-09-24 ~ 2026-09-25] aiccloud VPS Deployment & Troubleshooting
 
-* **Tasks 9-16 Archive**: Doctor footer placement, QR, referrals, aiccloud deployment CLI, prescription fixes, and initial `opd.biomechasoft.in` subdomain routing.
-
-### Task 17: Multi-Domain Deployment (`thyrogendiagnostic.in`), Dedicated Backend (Port 5001) & Isolated Database (`throgendb`)
-* **Date & Time**: 2026-09-26 19:15 ~ 20:30 IST
-* **Goal**: Deploy BMS-OPD application to new custom domain `https://thyrogendiagnostic.in` (and `www.thyrogendiagnostic.in`), backed by a separate backend instance on port `5001` and an isolated database `throgendb`, while preserving `https://opd.biomechasoft.in` (port `5000`, `MERN_STACK_HOSPITAL_MANAGEMENT`).
-* **Steps Taken**:
-  1. **Database Migration & Isolation**:
-     - Dumped all collections (medicines, diagnostic tests, users, templates, settings) and restored into new database `throgendb` on local MongoDB 8.0 (`mongorestore --nsFrom="MERN_STACK_HOSPITAL_MANAGEMENT.*" --nsTo="throgendb.*"`).
-     - Verified `throgendb` has 5,597 documents restored and is completely isolated from `MERN_STACK_HOSPITAL_MANAGEMENT`.
-  2. **Dedicated Backend Setup (`thyrogen-backend`)**:
-     - Created `/root/thyrogen-be` on VPS with `.env` pointing to `PORT=5001` and `MONGO_URI=mongodb://127.0.0.1:27017/throgendb`.
-     - Registered and started PM2 process `thyrogen-backend` listening on port `5001`. Verified local connection.
-  3. **Universal Same-Origin Frontend Routing**:
-     - Updated `BMS-opd-fe/src/utils/api.js` to dynamically fall back to same-origin relative paths (`""`) in production when `VITE_BASE_URL` is empty.
-     - Built production bundle locally and transferred `dist.tar.gz` to VPS via SFTP stream.
-     - Deployed frontend to both `/root/BMS-opd-fe` and dedicated `/root/thyrogen-fe`.
-  4. **Nginx Multi-Site Configuration**:
-     - Configured `/etc/nginx/sites-available/default`:
-       - `server_name opd.biomechasoft.in`: serves `/root/BMS-opd-fe`, proxies `/api` and `/uploads` to port `5000`.
-       - `server_name thyrogendiagnostic.in www.thyrogendiagnostic.in`: serves `/root/thyrogen-fe`, proxies `/api` and `/uploads` to port `5001`.
-       - `server_name biomechasoft.in www.biomechasoft.in`: 301 redirects to `https://opd.biomechasoft.in$request_uri`.
-     - Validated syntax (`nginx -t`) and reloaded Nginx.
-  5. **Automated Backup Enhancement**:
-     - Updated `/root/backup-to-s3.sh` to dump and upload archives for both `MERN_STACK_HOSPITAL_MANAGEMENT` and `throgendb` to the S3 bucket daily.
-  6. **Verification Over HTTPS**:
-     - `https://thyrogendiagnostic.in`: HTTP 200 OK (React frontend).
-     - `https://thyrogendiagnostic.in/api/v1/user/doctors`: HTTP 200 OK (Express on port 5001 + throgendb).
-     - `https://opd.biomechasoft.in`: HTTP 200 OK (React frontend).
-     - `https://opd.biomechasoft.in/api/v1/user/doctors`: HTTP 200 OK (Express on port 5000 + MERN_STACK_HOSPITAL_MANAGEMENT).
+* **Tasks 9-17 Archive**: Doctor footer placement, QR, referrals, aiccloud deployment CLI, prescription fixes, opd subdomain routing, and dedicated `throgendb` isolation on port 5001.
 
 ---
 
@@ -287,4 +259,23 @@
      - `https://opd.thyrogendiagnostic.in/api/v1/user/doctors`: HTTP 200 OK.
      - `https://opd.biomechasoft.in/`: Decommissioned / rejected connection.
 
+---
 
+### Task 33: Dedicated Supabase Database Migration (`yxjfkzdaxlmwleantasf`) & Admin Seeding
+* **Date & Time**: 2026-09-27 17:42 IST
+* **Goal**: Migrate from Lovable's placeholder Supabase project to the user's dedicated Supabase project (`https://yxjfkzdaxlmwleantasf.supabase.co`), verify all PostgreSQL relational tables and seed data, install `@supabase/ssr`, create client/server helpers, and register admin account (`Admin@Thyrogen.com`).
+* **Steps Taken**:
+  1. **Dependencies & Configuration**:
+     - Installed `@supabase/supabase-js` and `@supabase/ssr` in `thyrogen`.
+     - Created `.env.local` and `.env` with `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `VITE_SUPABASE_URL`, and `VITE_SUPABASE_ANON_KEY`.
+     - Built `src/utils/supabase/client.ts` (`createBrowserClient`) and `src/utils/supabase/server.ts` (`createServerClient`).
+     - Updated `src/lib/supabase.ts` with direct fallbacks to the new project.
+  2. **Schema & Tables Verification**:
+     - User executed `schema.sql` in Supabase SQL editor.
+     - Verified live schema: `site_settings` (6 records), `test_categories` (6 categories), and all relational tables active.
+  3. **Admin User Registration**:
+     - Executed admin seeding routine: registered `Admin@Thyrogen.com` (user ID: `0c1eb89b-8986-4bc6-b87c-8f94b19b8ee9`) in Supabase Auth.
+     - Added profile auto-insert policy: `CREATE POLICY "Users can insert own profile" ON public.profiles FOR INSERT WITH CHECK (auth.uid() = user_id)`.
+  4. **Build & Git Sync**:
+     - Verified production build (`npm run build`) passed with 0 errors in 5.79s.
+     - Committed (`11f9699`) and pushed `thyrogen` to `origin/main`.
