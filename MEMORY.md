@@ -136,8 +136,25 @@
 * **Steps Taken**:
   1. **Appointments Header Spacing**: Added `padding: 1.5rem 1.75rem` (`24px 28px`) to `.table-banner` and `.heading-box` in `Dashboard.css`, providing generous breathing room for the "Appointments" heading and action buttons.
   2. **Action Button Hierarchy**: Added distinct styling for `Book Appointment` (primary gradient), `View Slots` (outlined pill), and `Delete` (soft danger badge).
-  3. **Dark Mode Radial Action Menu**: Refactored `RadialMenu.css` to eliminate hardcoded white disc backgrounds; applied dark slate (`#1e293b`) circular discs with borders (`#334155`) and cyan hover glows, perfectly blending with dark theme.
   4. **Analytics Charts**: Replaced static placeholders with interactive Donut chart (`PieChartCard.jsx`), glowing spline trend (`LineChartCard.jsx`), and dual-gradient bars (`SimpleBarChart.jsx`).
   5. **Live VPS Deployment**: Built production bundle (0 errors), packaged tarball via `Boss/deploy-opd-vps.js`, updated backend PM2 process (`thyrogen-backend`), deployed frontend to `/root/thyrogen-opd-fe`, reloaded Nginx, and verified live HTTP 200 OK at `https://opd.thyrogendiagnostic.in`.
   6. Pushed `BMS_OPD` (`4497190` to `origin/Sohel2`).
+
+---
+
+### Task 44: 502 Bad Gateway Diagnosis, PM2 Resurrect & Auto-Startup Configuration
+* **Date & Time**: 2026-09-28 22:10 IST
+* **Goal**: Diagnose 502 Bad Gateway errors on `https://thyrogendiagnostic.in` and `https://opd.thyrogendiagnostic.in/api/v1`, restore upstream Node processes on ports 3002 & 5001, and configure systemd auto-restart.
+* **Steps Taken**:
+  1. **Root Cause Analysis**: Connected to VPS via SSH (`148.113.6.25:20172`) and inspected PM2 status. The PM2 process table was completely empty due to a daemon reboot at 16:16 UTC, leaving Nginx upstreams (ports 3002 and 5001) unreachable.
+  2. **Process Resurrect**: Executed `pm2 resurrect`, successfully restoring `thyrogen-backend` (`/root/thyrogen-be/server.js` on port 5001) and `thyrogen-website` (`/root/thyrogen-website/server/index.mjs` on port 3002).
+  3. **Auto-Boot Configuration**: Configured systemd service via `pm2 startup` (`systemctl enable pm2-root`) and froze process state to disk with `pm2 save` to guarantee automatic recovery across VPS reboots.
+  4. **Live Verification**: Verified all endpoints over HTTPS:
+     - `https://thyrogendiagnostic.in/` (HTTP 200 OK - 62KB SSR)
+     - `https://thyrogendiagnostic.in/doctors` (HTTP 200 OK)
+     - `https://thyrogendiagnostic.in/tests` (HTTP 200 OK)
+     - `https://thyrogendiagnostic.in/api/v1/user/doctors` (HTTP 200 OK)
+     - `https://opd.thyrogendiagnostic.in/` (HTTP 200 OK)
+     - `https://opd.thyrogendiagnostic.in/api/v1/user/doctors` (HTTP 200 OK)
+
 
