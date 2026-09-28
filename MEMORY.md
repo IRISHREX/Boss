@@ -127,3 +127,17 @@
   3. **Theme-Adaptive Styling**: Bound `OrganizationSettings.css` hero banner, inputs, QR container, and action buttons to semantic tokens (`var(--btn-gradient)`, `var(--bg-card)`, `var(--accent)`, `var(--border-color)`). Added dark mode overrides for Header/Footer designer.
   4. **Audio Feedback Console**: Designed audio mixer workstation with volume slider, Mute/Unmute state chip, and 4 audition test tiles.
   5. Verified production build (`npm run build` completed with 0 errors). Committed and pushed `BMS_OPD` (`12deaa8` to `origin/Sohel2`).
+
+---
+
+### Task 43: Dashboard UI/UX Redesign, Table Banner Padding, Dark Radial Action Menu & VPS Deployment
+* **Date & Time**: 2026-09-28 21:50 IST
+* **Goal**: Modernize OPD Dashboard analytics with interactive charts, refine appointments table top banner spacing, fix dark mode circular action button background, and deploy live to VPS.
+* **Steps Taken**:
+  1. **Appointments Header Spacing**: Added `padding: 1.5rem 1.75rem` (`24px 28px`) to `.table-banner` and `.heading-box` in `Dashboard.css`, providing generous breathing room for the "Appointments" heading and action buttons.
+  2. **Action Button Hierarchy**: Added distinct styling for `Book Appointment` (primary gradient), `View Slots` (outlined pill), and `Delete` (soft danger badge).
+  3. **Dark Mode Radial Action Menu**: Refactored `RadialMenu.css` to eliminate hardcoded white disc backgrounds; applied dark slate (`#1e293b`) circular discs with borders (`#334155`) and cyan hover glows, perfectly blending with dark theme.
+  4. **Analytics Charts**: Replaced static placeholders with interactive Donut chart (`PieChartCard.jsx`), glowing spline trend (`LineChartCard.jsx`), and dual-gradient bars (`SimpleBarChart.jsx`).
+  5. **Live VPS Deployment**: Built production bundle (0 errors), packaged tarball via `Boss/deploy-opd-vps.js`, updated backend PM2 process (`thyrogen-backend`), deployed frontend to `/root/thyrogen-opd-fe`, reloaded Nginx, and verified live HTTP 200 OK at `https://opd.thyrogendiagnostic.in`.
+  6. Pushed `BMS_OPD` (`4497190` to `origin/Sohel2`).
+
