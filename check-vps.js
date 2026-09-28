@@ -11,6 +11,9 @@ async function run() {
       username: 'root',
       password: 'Ml0NqUQECgW2nFDF',
       tryKeyboard: true,
+      readyTimeout: 120000,
+      keepaliveInterval: 5000,
+      keepaliveCountMax: 10,
     });
     console.log('✅ Connected to VPS successfully!\n');
 

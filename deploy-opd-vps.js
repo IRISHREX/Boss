@@ -11,7 +11,9 @@ const VPS_USER = 'root';
 const VPS_PASS = 'Ml0NqUQECgW2nFDF';
 
 const PROJECT_ROOT = path.resolve(__dirname, '..');
-const FE_DIST = path.join(PROJECT_ROOT, 'BMS_OPD', 'dist');
+const FE_DIST = fs.existsSync(path.join(PROJECT_ROOT, 'BMS-opd-fe', 'dist'))
+  ? path.join(PROJECT_ROOT, 'BMS-opd-fe', 'dist')
+  : path.join(PROJECT_ROOT, 'BMS_OPD', 'dist');
 
 async function deploy() {
   console.log('===============================================================');

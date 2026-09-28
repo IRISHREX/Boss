@@ -157,4 +157,26 @@
      - `https://opd.thyrogendiagnostic.in/` (HTTP 200 OK)
      - `https://opd.thyrogendiagnostic.in/api/v1/user/doctors` (HTTP 200 OK)
 
+---
+
+### Task 45: Referral Appointment Patient ID Auto-Link, Prescription Self-Healing & Live VPS Deployment
+* **Date & Time**: 2026-09-29 00:23 IST
+* **Goal**: Fix undefined patient ID when accepting/converting inbound referrals, ensure seamless prescription generation, retrofit existing orphaned appointments on VPS MongoDB, and deploy live to production.
+* **Steps Taken**:
+  1. **Backend Referral Conversion & Healing (`BMS-opd-be`)**:
+     - Updated `convertToAppointment` in `controller/referralController.js` to automatically resolve or create a Patient user record (`role: "Patient"`), link `patientId: patient._id` to the appointment and invoice, and self-heal previously converted appointments.
+     - Implemented `ensureAppointmentPatient` in `controller/appointmentController.js` (`POST /api/v1/appointment/ensure-patient/:id`) with phone/email sanitization and valid schema enums.
+     - Added `getAppointmentById` (`GET /api/v1/appointment/:id`) and protected `getAppointmentsByPatientId` from CastError crashes on undefined/invalid IDs.
+     - Added ObjectId validation to `getPatientById` in `controller/userController.js`.
+  2. **Frontend Prescription Resilience (`BMS-opd-fe`)**:
+     - Hardened `handlePrescriptionClick` in `src/components/Dashboard.jsx` with an automatic self-healing fallback to `/api/v1/appointment/ensure-patient/:id` whenever `appointment.patientId` is missing, null, or the string `"undefined"`. Refreshes appointments and smoothly opens the prescription modal.
+     - Added fallback in `src/components/Prescription.jsx` to load appointment directly via `propAppointmentId` if `patientId` is unlinked.
+  3. **Live Database Retrofit (`throgendb`)**:
+     - Ran `retrofit-appointments.js` against VPS MongoDB `throgendb` (`148.113.6.25:20172`). Identified and repaired 4 legacy appointments missing `patientId`, created/matched Patient records, and synchronized associated referral documents (0 remaining).
+  4. **Build, Commit & Live Deployment**:
+     - Built frontend production bundle (`vite build` completed in 1m 48s with 0 errors).
+     - Pushed `BMS_OPD_BE` (`274e86b` to `origin/main`).
+     - Pushed `BMS_OPD` (`40341ef` to `origin/Sohel2`).
+     - Deployed via `Boss/deploy-opd-vps.js`: pulled latest backend on VPS, restarted PM2 `thyrogen-backend`, deployed frontend bundle to `/root/thyrogen-opd-fe`, reloaded Nginx, and verified live HTTP 200 OK at `https://opd.thyrogendiagnostic.in`.
+
 
