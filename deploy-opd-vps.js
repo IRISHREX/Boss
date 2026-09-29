@@ -8,7 +8,7 @@ const ssh = new NodeSSH();
 const VPS_HOST = '148.113.6.25';
 const VPS_PORT = 20172;
 const VPS_USER = 'root';
-const VPS_PASS = 'Ml0NqUQECgW2nFDF';
+const VPS_PASS = '8jMA1A_-TsMKEOKd';
 
 const PROJECT_ROOT = path.resolve(__dirname, '..');
 const FE_DIST = fs.existsSync(path.join(PROJECT_ROOT, 'BMS-opd-fe', 'dist'))

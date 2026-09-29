@@ -37,7 +37,7 @@ async function deployToDb() {
     host: '148.113.6.25',
     port: 20172,
     username: 'root',
-    password: 'Ml0NqUQECgW2nFDF',
+    password: '8jMA1A_-TsMKEOKd',
   });
   console.log('Connected to VPS. Uploading payload...');
 

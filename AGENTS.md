@@ -26,7 +26,7 @@ Whenever working with the aiccloud production VPS:
   * **VPS IP**: `148.113.6.25`
   * **SSH Port**: `20172`
   * **SSH User**: `root`
-  * **Password**: `Ml0NqUQECgW2nFDF`
+  * **Password**: `8jMA1A_-TsMKEOKd`
 * **Failover Database**: MongoDB Atlas `mongodb+srv://Irishrex:Samima2006@irishrex.p1e0kow.mongodb.net/`
 * **S3 Object Storage**:
   * **Endpoint**: `https://s3.aiccloud.online`

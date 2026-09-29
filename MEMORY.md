@@ -245,19 +245,26 @@
      - Built frontend bundle via npm run build (0 errors).
      - Pushed BMS-opd-fe (f817847 to origin/Sohel2).
      - Executed deploy-opd-vps.js: deployed bundle to /root/thyrogen-opd-fe, reloaded Nginx, and verified live at https://opd.thyrogendiagnostic.in.
-- **Task 49: Production Backend Failover Recovery, Nginx Domain Routing & Memory Protection (Live - 2026-09-29)**:
-  1. **Root Cause Analysis**:
-     - At system boot/restart, PM2 started thyrogen-backend slightly before mongod was listening, causing an initial ECONNREFUSED on local MongoDB.
-     - dbConnection.js immediately switched to MongoDB Atlas (which did not have the throgendb dataset or users), leaving logins failing with 'Found user: null'.
-     - In Nginx biomechasoft.conf, opd.biomechasoft.in was erroneously routing /api to port 5002 (Clinic-Logic backend) instead of port 5001 (OPD backend), producing 404s.
-  2. **Database Reconnect Resilience & Systemd Service Ordering**:
-     - Upgraded [dbConnection.js](file:///c:/PROJECTS/BMS-OPD/BMS-opd-be/database/dbConnection.js) with 30-attempt retry loop (60s total) for local MongoDB and require USE_ATLAS_FAILOVER flag before Atlas fallback (commit 47144b3). If local MongoDB is not ready, process exits with code 1 so PM2 auto-restarts once mongod is listening.
-     - Updated /etc/systemd/system/pm2-root.service with `After=network.target mongod.service mysql.service` and `Wants=mongod.service mysql.service` so systemd never starts PM2 before MongoDB or MySQL are ready.
-     - Configured /root/thyrogen-be/.env on VPS to explicitly target MONGO_URI=mongodb://127.0.0.1:27017/throgendb and DB_NAME=throgendb.
-  3. **Nginx Domain Isolation**:
-     - Separated biomechasoft.in (/var/www/biomechasoft -> port 5002) and opd.biomechasoft.in (/root/thyrogen-opd-fe -> port 5001).
-     - Cleaned stale port 5000 proxy block from default catch-all.
-  4. **Verification & Stability**:
-     - Executed pm2 save and verified all services online with 0 restarts.
-     - All 4 domains/endpoints verified HTTP 200 OK (opd.thyrogendiagnostic.in, opd.biomechasoft.in, biomechasoft.in, thyrogendiagnostic.in).
+- **Task 50: Full VPS Restoration Recovery, S3 Database Restore & Multi-Domain Re-Deployment (Live - 2026-09-29)**:
+  1. **Infrastructure Provisioning on Fresh Ubuntu 24.04 (`vps-1znc`)**:
+     - Authenticated to newly restored VPS (`148.113.6.25:20172`) with new credentials (`8jMA1A_-TsMKEOKd`).
+     - Configured 2GB swap space to guarantee memory stability on the 1GB RAM machine.
+     - Installed Node.js v20.20.2 LTS, PM2 7.0.4, Nginx 1.24, Certbot, and MongoDB 8.0.32 (`mongodb-org`).
+  2. **Database Recovery from S3 Storage**:
+     - Downloaded latest automated backup `2026-09-27_02-00-01_mongo_dump.gz` from S3 bucket `aic-585105c0`.
+     - Executed `mongorestore` restoring all 5,628 documents cleanly into local MongoDB `throgendb` (917 tests, 4,115 medicines, 8 users, appointments, settings).
+     - Executed `seed-thyroid-catalog.js` bringing `medicaladvices` up to 430 complete clinical protocols.
+     - Verified `retrofit-appointments.js` ensuring 0 orphaned appointments.
+  3. **Backend & Frontend Applications Deployment**:
+     - **Backend (`thyrogen-be`)**: Packaged, deployed to `/root/thyrogen-be`, installed production dependencies, configured `.env`, and launched via PM2 as `thyrogen-backend` on port `5001`.
+     - **Frontend (`thyrogen-opd-fe`)**: Built local production bundle with Vite (`BMS-opd-fe`), uploaded and extracted to `/root/thyrogen-opd-fe`. Fixed directory traversal permissions (`chmod 755 /root`).
+     - **Website (`thyrogen-website`)**: Built Nitro/TanStack SSR bundle, deployed to `/root/thyrogen-website`, configured `.env` with Supabase credentials, and launched via PM2 as `thyrogen-website` on port `3002`.
+  4. **Nginx Routing & Edge SSL Integration**:
+     - Configured Nginx reverse proxy routing `thyrogendiagnostic.in` to SSR port 3002 (with `/assets`, `/api`, and `/uploads` bridges) and `opd.thyrogendiagnostic.in` to `/root/thyrogen-opd-fe` with `/api` and `/uploads` proxied to port 5001.
+     - Identified edge Caddy SSL termination on host network, ensuring smooth HTTP/2 HTTPS delivery across both domains.
+     - Configured PM2 systemd boot persistence ordered after MongoDB (`After=network.target mongod.service`).
+     - Installed daily automated S3 backup cron job (`02:00 AM UTC`).
+  5. **Verification**:
+     - All domains verified HTTP/2 200 OK: `https://thyrogendiagnostic.in`, `https://thyrogendiagnostic.in/doctors`, `https://thyrogendiagnostic.in/tests`, `https://opd.thyrogendiagnostic.in`.
+     - Live API endpoints verified: `/api/v1/medical/suggestions/symptoms` and `/api/v1/user/doctors`.
 

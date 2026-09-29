@@ -17,17 +17,35 @@ async function run() {
     });
     console.log('✅ Connected to VPS successfully!\n');
 
-    console.log('--- PM2 Status ---');
-    const pm2Res = await ssh.execCommand('pm2 status');
-    console.log(pm2Res.stdout);
+    console.log('--- caddy status ---');
+    const caddy = await ssh.execCommand('which caddy || echo "no caddy"');
+    console.log(caddy.stdout);
+    const caddyPs = await ssh.execCommand('ps aux | grep -i caddy');
+    console.log(caddyPs.stdout);
 
-    console.log('--- Current Nginx Configuration ---');
-    const nginxRes = await ssh.execCommand('cat /etc/nginx/sites-available/default');
-    console.log(nginxRes.stdout);
+    console.log('--- curl to biomechasoft.in directly to 127.0.0.1:80 ---');
+    const curlLocal = await ssh.execCommand("curl -Is http://127.0.0.1 -H 'Host: biomechasoft.in'");
+    console.log(curlLocal.stdout);
 
-    console.log('--- Root Directories ---');
-    const lsRes = await ssh.execCommand('ls -la /root');
-    console.log(lsRes.stdout);
+    console.log('--- curl to biomechasoft.in:5000 ---');
+    const curl5000 = await ssh.execCommand("curl -Is http://127.0.0.1:5000 -H 'Host: biomechasoft.in'");
+    console.log(curl5000.stdout);
+
+    console.log('--- curl to biomechasoft.in:3000 ---');
+    const curl3000 = await ssh.execCommand("curl -Is http://127.0.0.1:3000 -H 'Host: biomechasoft.in'");
+    console.log(curl3000.stdout);
+
+    console.log('--- curl to opd.biomechasoft.in on 127.0.0.1:80 ---');
+    const curlOpdB = await ssh.execCommand("curl -Is http://127.0.0.1 -H 'Host: opd.biomechasoft.in'");
+    console.log(curlOpdB.stdout);
+
+    console.log('--- curl to opd.biomechasoft.in:5000 ---');
+    const curlOpdB5000 = await ssh.execCommand("curl -Is http://127.0.0.1:5000 -H 'Host: opd.biomechasoft.in'");
+    console.log(curlOpdB5000.stdout);
+
+    console.log('--- DNS resolution on VPS ---');
+    const dns = await ssh.execCommand("nslookup biomechasoft.in && nslookup opd.biomechasoft.in");
+    console.log(dns.stdout);
 
     ssh.dispose();
   } catch (err) {
