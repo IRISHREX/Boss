@@ -9,13 +9,9 @@ async function testEndpoints() {
     password: 'Ml0NqUQECgW2nFDF'
   });
 
-  const postRes = await ssh.execCommand(`curl -s -X POST http://127.0.0.1:5001/api/v1/settings/general/commission-settings -H "Content-Type: application/json" -d '{"registeredSelfPercentage":5,"registeredOtherPercentage":8,"guestSelfPercentage":0,"guestOtherPercentage":0,"defaultPercentage":5}'`);
-  console.log('--- POST COMMISSION SETTINGS ---');
-  console.log(postRes.stdout);
-
-  const curlSettings = await ssh.execCommand('curl -s http://127.0.0.1:5001/api/v1/settings/general');
-  console.log('\n--- VERIFY GENERAL SETTINGS ---');
-  console.log(curlSettings.stdout);
+  console.log('--- TESTING LIVE HTTPS PUBLIC API ---');
+  const res = await ssh.execCommand("curl -s https://opd.thyrogendiagnostic.in/api/v1/medical/suggestions/symptoms | head -c 200");
+  console.log(res.stdout || res.stderr);
 
   ssh.dispose();
 }
