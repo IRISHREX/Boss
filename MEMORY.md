@@ -245,3 +245,19 @@
      - Built frontend bundle via npm run build (0 errors).
      - Pushed BMS-opd-fe (f817847 to origin/Sohel2).
      - Executed deploy-opd-vps.js: deployed bundle to /root/thyrogen-opd-fe, reloaded Nginx, and verified live at https://opd.thyrogendiagnostic.in.
+- **Task 49: Production Backend Failover Recovery, Nginx Domain Routing & Memory Protection (Live - 2026-09-29)**:
+  1. **Root Cause Analysis**:
+     - At system boot/restart, PM2 started thyrogen-backend slightly before mongod was listening, causing an initial ECONNREFUSED on local MongoDB.
+     - dbConnection.js immediately switched to MongoDB Atlas (which did not have the throgendb dataset or users), leaving logins failing with 'Found user: null'.
+     - In Nginx biomechasoft.conf, opd.biomechasoft.in was erroneously routing /api to port 5002 (Clinic-Logic backend) instead of port 5001 (OPD backend), producing 404s.
+  2. **Database Reconnect Resilience & Configuration**:
+     - Upgraded [dbConnection.js](file:///c:/PROJECTS/BMS-OPD/BMS-opd-be/database/dbConnection.js) with 8-attempt retry loop (2s backoff) to wait for local MongoDB to start up. Pushed commit d3dc1ff to origin/main.
+     - Configured /root/thyrogen-be/.env on VPS to explicitly target MONGO_URI=mongodb://127.0.0.1:27017/throgendb and DB_NAME=throgendb.
+  3. **Nginx Domain Isolation**:
+     - Separated biomechasoft.in (/var/www/biomechasoft -> port 5002) and opd.biomechasoft.in (/root/thyrogen-opd-fe -> port 5001).
+     - Cleaned stale port 5000 proxy block from default catch-all.
+  4. **Memory Hardening**:
+     - Added 1GB swapfile (/swapfile) on VPS to prevent memory starvation across MySQL, MongoDB, and 3 PM2 node services on the 1GB RAM instance.
+  5. **Verification**:
+     - All 4 domains/endpoints verified HTTP 200 OK (opd.thyrogendiagnostic.in, opd.biomechasoft.in, biomechasoft.in, thyrogendiagnostic.in).
+
