@@ -234,3 +234,14 @@
      - Backend pushed (e023e90 to main), pulled to /root/thyrogen-be, PM2 thyrogen-backend restarted.
      - Frontend built via npm run build (0 errors, 64bc43b pushed to Sohel2), deployed to /root/thyrogen-opd-fe, Nginx reloaded.
      - Verified live at https://opd.thyrogendiagnostic.in with HTTP 200 OK.
+
+- **Task 48: Messages Prescription PDF Download Resolution & Patient Phone Sync (Live Deployed - 2026-09-29)**:
+  1. **Direct Preview URL & Patient Extraction in Messages**:
+     - Upgraded handleDownloadPrescription in Messages.jsx to parse patientId directly from preview link /preview/:patientId in message text, bypassing phone query completely for instant modal opening.
+     - Added multi-tier patient resolution fallback: patient NIC search, extracted patient name search, non-dummy phone search, and sender name search.
+  2. **Patient Phone Sync in Prescription Notifications**:
+     - In Prescription.jsx, stored patient phone (latest.phone) and passed it into system notification dispatch.
+  3. **Build & Live VPS Deployment**:
+     - Built frontend bundle via npm run build (0 errors).
+     - Pushed BMS-opd-fe (f817847 to origin/Sohel2).
+     - Executed deploy-opd-vps.js: deployed bundle to /root/thyrogen-opd-fe, reloaded Nginx, and verified live at https://opd.thyrogendiagnostic.in.
