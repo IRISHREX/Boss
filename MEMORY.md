@@ -180,3 +180,37 @@
      - Deployed via `Boss/deploy-opd-vps.js`: pulled latest backend on VPS, restarted PM2 `thyrogen-backend`, deployed frontend bundle to `/root/thyrogen-opd-fe`, reloaded Nginx, and verified live HTTP 200 OK at `https://opd.thyrogendiagnostic.in`.
 
 
+
+---
+
+### Task 46: Capacity Calendar, Platform Fee Fix, Address Storage, Referral Table & 430+ Thyroid Catalog
+* **Date & Time**: 2026-09-29 07:25 IST
+* **Goal**: Deliver 6 requested features: interactive Doctor Capacity Calendar & modal, eliminate hardcoded 100 platform fee to database value (20), clinic address storage with similarity auto-promotion & patient booking datalist, comprehensive 430+ medical catalog with thyroid emphasis, full Referral & Commission management table with auto-pay/bulk actions, and notification audio chime (notification.mp3) with volume/mute state saved in DB.
+* **Steps Taken**:
+  1. **Doctor Capacity Calendar & Modal**:
+     - Built interactive monthly calendar in [DoctorCapacitySettings.jsx](file:///c:/PROJECTS/BMS-OPD/BMS-opd-fe/src/components/DoctorCapacitySettings.jsx) with date tiles, color-coded booking thresholds (green <50%, yellow 50-75%, red >75%, gray off-day), multi-date selection toggle, and modal dialog to configure capacity, working days, and clinical timings across multiple dates simultaneously.
+     - Styled in [DoctorCapacitySettings.css](file:///c:/PROJECTS/BMS-OPD/BMS-opd-fe/src/components/DoctorCapacitySettings.css). Updated backend capacityController.js to support explicit dates array and mounted at /api/v1/capacity.
+  2. **Platform Fee Fixed to General Settings (Rs 20)**:
+     - Replaced Math.round((d.consultationFee || 100) * 0.2) in [Appointment.jsx](file:///c:/PROJECTS/BMS-OPD/BMS-opd-fe/src/components/Appointment.jsx) which forced fee to 100 with dynamic lookup of generalSettings.platformFee (20 for Thyrogen in throgendb).
+     - Added backend fallback in appointmentController.js to query GeneralSettings.platformFee.
+  3. **Address Storage & Similarity Auto-Promotion**:
+     - Added savedAddresses array to models/generalSettingsSchema.js.
+     - Implemented similarity detection (areAddressesSimilar with normalized token overlap) in generalSettingsController.js so when addresses are modified, similar entries are updated in-place and promoted to most recent.
+     - Added saved address chip selection and delete actions in [OrganizationSettings.jsx](file:///c:/PROJECTS/BMS-OPD/BMS-opd-fe/src/components/OrganizationSettings.jsx) and <datalist> auto-suggest in [Appointment.jsx](file:///c:/PROJECTS/BMS-OPD/BMS-opd-fe/src/components/Appointment.jsx).
+  4. **Referral Management & Commission Payouts**:
+     - Built dedicated [ReferralsTable.jsx](file:///c:/PROJECTS/BMS-OPD/BMS-opd-fe/src/components/ReferralsTable.jsx) with search, status filters, signed-in partner vs guest badges, commission % editor, single Pay, and bulk Auto-Pay / Delete.
+     - Added backend endpoints in referralController.js: updateReferralCommission, payReferralCommission, bulkPayReferralCommissions, and bulkDeleteReferrals.
+     - Added /referrals route in App.jsx and menu entry in Sidebar.jsx.
+  5. **Notification Audio & Sound Settings in DB**:
+     - Added notification.mp3 in BMS-opd-fe/public/ and playNotificationSound() in soundUtils.js.
+     - Added soundSettings: { volume, isMuted } to generalSettingsSchema.js and userSchema.js.
+     - Updated ThemeSettings.jsx to load and persist volume/mute settings to DB and added an audition tile for notification.mp3.
+     - Added live notification polling in TopHeader.jsx with unread count bubble badge and audio chime on arrival.
+     - Added system Message generation in referralController.js on referral bookings so doctor/admin notifications fire immediately.
+  6. **Thyroid-Focused Medical Catalog Expansion (430+ Records)**:
+     - Generated 415 comprehensive clinical treatment protocols mapping real diagnostictests (917 existing) and medicines (4,115 existing) in throgendb.
+     - Upserted into medicaladvices collection, expanding total records from 15 to 430.
+  7. **Build & Live VPS Deployment**:
+     - Built frontend bundle via npm run build (0 errors).
+     - Pushed BMS_OPD_BE (9918d0b to origin/main) and BMS_OPD (778157a to origin/Sohel2).
+     - Executed deploy-opd-vps.js: restarted thyrogen-backend PM2 process, deployed frontend to /root/thyrogen-opd-fe, reloaded Nginx, and verified live HTTP 200 OK at https://opd.thyrogendiagnostic.in.
