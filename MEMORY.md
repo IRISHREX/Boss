@@ -210,7 +210,8 @@
   6. **Thyroid-Focused Medical Catalog Expansion (430+ Records)**:
      - Generated 415 comprehensive clinical treatment protocols mapping real diagnostictests (917 existing) and medicines (4,115 existing) in throgendb.
      - Upserted into medicaladvices collection, expanding total records from 15 to 430.
-  7. **Build & Live VPS Deployment**:
+  7. **Build & Live VPS Deployment & Backend Hotfix**:
+      - Fixed missing express import in generalSettingsRouter.js (commit 49438f3).
      - Built frontend bundle via npm run build (0 errors).
      - Pushed BMS_OPD_BE (9918d0b to origin/main) and BMS_OPD (778157a to origin/Sohel2).
      - Executed deploy-opd-vps.js: restarted thyrogen-backend PM2 process, deployed frontend to /root/thyrogen-opd-fe, reloaded Nginx, and verified live HTTP 200 OK at https://opd.thyrogendiagnostic.in.
