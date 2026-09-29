@@ -2,8 +2,8 @@
 
 ## System Memory Maintenance Rule
 * **Memory Log File**: `MEMORY.md` located in the root repository.
-* **Format**: Document all executed tasks with **Date**, **Time**, **Task Goal**, and **Step-by-Step Actions**.
-* **Strict Limit**: Maintain `MEMORY.md` under **300 lines**. Whenever new tasks cause the file to exceed 300 lines, delete the oldest historical records to keep the file <= 300 lines.
+* **Format**: Document all executed tasks with **Date**, **Time**, **Task Goal**,**User's Name** and **Step-by-Step Actions**.
+* **Strict Limit**: Maintain `MEMORY.md` under **500 lines**. Whenever new tasks cause the file to exceed 500 lines, delete the oldest historical records to keep the file <= 500 lines.
 
 ---
 
