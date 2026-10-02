@@ -268,3 +268,18 @@
      - All domains verified HTTP/2 200 OK: `https://thyrogendiagnostic.in`, `https://thyrogendiagnostic.in/doctors`, `https://thyrogendiagnostic.in/tests`, `https://opd.thyrogendiagnostic.in`.
      - Live API endpoints verified: `/api/v1/medical/suggestions/symptoms` and `/api/v1/user/doctors`.
 
+
+- **Task 51: BMS-LAB Central Patient API Integration for Test Booking (2026-10-02)**:
+  1. **Direct Central Lab API Client (POST /api/patients)**:
+     - Configured registerLabPatient in src/lib/services.ts targeting https://labapi.biomechasoft.in/api/patients.
+     - Standardized payload with mandatory orderType: "Home Visit" along with name, age, gender, phone, email, address, and bloodGroup.
+  2. **Home Sample Collection Integration (HomeCollectionPortal)**:
+     - Extended HomeCollectionBooking schema in src/types/database.ts with demographics and lab tokens (lab_pid, lab_patient_id, order_type: "Home Visit").
+     - Upgraded HomeCollectionPortal in src/components/report-components.tsx with Age, Gender, Email, and Blood Group inputs.
+     - Automatically registers patient upon booking and displays generated Central Lab Patient PID badge (e.g. PT-006).
+  3. **WhatsApp Clinical Booking Modal Integration (WhatsAppBookingModal)**:
+     - Added demographic fields (Gender, Email, Blood Group) in src/components/whatsapp-booking-modal.tsx.
+     - Integrated 1-click "Book Home Visit in Central Lab" direct action button with real-time success card, and background sync when sending to helpline.
+  4. **Build & Git Synchronization**:
+     - Production bundle verified with npm run build (0 errors).
+     - Pushed thyrogen commit b5e21fb to origin/main.
